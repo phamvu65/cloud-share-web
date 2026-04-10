@@ -1,12 +1,51 @@
 @import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
-/* 1. Global Styles */
-* {
-  font-family: 'Urbanist', sans-serif;
+
+:root {
+  --font-sans: 'Urbanist', sans-serif;
+
+  --color-primary:       #7c3aed; /* purple-600 */
+  --color-primary-hover: #6d28d9; /* purple-700 */
+  --color-success:       #15803d; /* green-700  */
+  --color-text-muted:    #4b5563; /* gray-600   */
 }
 
-/* 2. Custom Component Classes (from your image) */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+
 .landing-page {
   @apply overflow-y-auto h-screen;
 }
@@ -15,15 +54,24 @@
   @apply overflow-visible;
 }
 
+/* --- Buttons --- */
+
+/* Ghost / icon button used inside cards */
 .card-btn {
-  @apply flex items-center gap-3 text-[12px] font-medium text-gray-600 hover:text-purple-600;
+  @apply flex items-center gap-3 text-[12px] font-medium
+         text-gray-600 transition-colors duration-150
+         hover:text-purple-600;
 }
 
+/* Text button with icon — e.g. "+ Add something" */
 .add-btn {
-  @apply flex items-center gap-1.5 text-xs md:text-sm font-medium text-green-700 whitespace-no-wrap;
+  @apply flex items-center gap-1.5 text-xs md:text-sm
+         font-medium text-green-700 whitespace-nowrap
+         transition-colors duration-150;
 }
 
+/* Modifier: filled / primary variant of .add-btn */
 .add-btn-fill {
-  @apply text-white bg-purple-600; 
+  @apply text-white bg-purple-600 rounded-md px-3 py-1.5
+         hover:bg-purple-700 transition-colors duration-150;
 }
-
