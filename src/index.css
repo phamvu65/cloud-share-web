@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+/* 1. Global Styles */
+* {
+  font-family: 'Urbanist', sans-serif;
+}
+
+/* 2. Custom Component Classes (from your image) */
+.landing-page {
+  @apply overflow-y-auto h-screen;
+}
+
+.landing-page-content {
+  @apply overflow-visible;
+}
+
+.card-btn {
+  @apply flex items-center gap-3 text-[12px] font-medium text-gray-600 hover:text-purple-600;
+}
+
+.add-btn {
+  @apply flex items-center gap-1.5 text-xs md:text-sm font-medium text-green-700 whitespace-no-wrap;
+}
+
+.add-btn-fill {
+  @apply text-white bg-purple-600; 
+}
+
