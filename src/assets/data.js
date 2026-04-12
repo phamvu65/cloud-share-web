@@ -1,3 +1,5 @@
+import {CreditCard, Files, LayoutDashboard, Receipt, Upload} from "lucide-react";
+
 export const features = [
     {
         iconName: "ArrowUpCircle",
@@ -6,86 +8,138 @@ export const features = [
         description: "Quickly upload your files with our intuitive drag-and-drop interface."
     },
     {
-        iconName: "ShieldCheck",
+        iconName: "Shield",
         iconColor: "text-green-500",
-        title: "Secure File Sharing",
-        description: "Share your files with confidence using our end-to-end encryption."
+        title: "Secure Storage",
+        description: "Your files are encrypted and stored securely in our cloud infrastructure."
     },
     {
-        iconName: "CloudDownload",
-        iconColor: "text-blue-500",
-        title: "Fast Downloads",
-        description: "Download your files instantly from anywhere, on any device."
+        iconName: "Share2",
+        iconColor: "text-purple-500",
+        title: "Simple Sharing",
+        description: "Share files with anyone using secure links that you control."
     },
     {
-        iconName: "Users",
-        iconColor: "text-yellow-500",
-        title: "Team Collaboration",
-        description: "Work together with your team and manage shared files easily."
+        iconName: "CreditCard",
+        iconColor: "text-orange-500",
+        title: "Flexible Credits",
+        description: "Pay only for what you use with our credit-based system."
+    },
+    {
+        iconName: "FileText",
+        iconColor: "text-red-500",
+        title: "File Management",
+        description: "Organize, preview, and manage your files from any device."
+    },
+    {
+        iconName: "Clock",
+        iconColor: "text-indigo-500",
+        title: "Transaction History",
+        description: "Keep track of all your credit purchases and usage."
     }
 ];
 
-const testimonials = [
+export const pricingPlans = [
     {
-        name: "John Doe",
-        role: "Product Manager",
-        company: "Tech Corp",
-        image: "https://example.com/john.jpg",
-        quote: "This solution has transformed the way we work.",
+        name: "Free",
+        price: "0",
+        description: "Perfect for getting started",
+        features: [
+            "5 file uploads",
+            "Basic file sharing",
+            "7-day file retention",
+            "Email support"
+        ],
+        cta: "Get Started",
+        highlighted: false
+    },
+    {
+        name: "Premium",
+        price: "500",
+        description: "For individuals with larger needs",
+        features: [
+            "500 file uploads",
+            "Advanced file sharing",
+            "30-day file retention",
+            "Priority email support",
+            "File analytics"
+        ],
+        cta: "Go Premium",
+        highlighted: true
+    },
+    {
+        name: "Ultimate",
+        price: "2500",
+        description: "For teams and businesses",
+        features: [
+            "5000 file uploads",
+            "Team sharing capabilities",
+            "Unlimited file retention",
+            "24/7 priority support",
+            "Advanced analytics",
+            "API access"
+        ],
+        cta: "Go Ultimate",
+        highlighted: false
+    }
+];
+
+export const testimonials = [
+    {
+        name: "Sarah Johnson",
+        role: "Marketing Director",
+        company: "CreativeMinds Inc.",
+        image: "https://randomuser.me/api/portraits/women/32.jpg",
+        quote: "CloudShare has transformed how our team collaborates on creative assets. The secure sharing and intuitive interface have made file management a breeze.",
         rating: 5
     },
     {
-        name: "Jane Smith",
-        role: "Senior Developer",
-        company: "Digital Solutions",
-        image: "https://example.com/jane.jpg",
-        quote: "Excellent service and great support team.",
-        rating: 4.5
-    },
-    {
-        name: "Mike Johnson",
-        role: "CEO",
-        company: "Innovation Labs",
-        image: "https://example.com/mike.jpg",
-        quote: "Highly recommended for any growing business.",
+        name: "Michael Chen",
+        role: "Freelance Designer",
+        company: "Self-employed",
+        image: "https://randomuser.me/api/portraits/men/46.jpg",
+        quote: "As a freelancer, I need to share large design files with clients securely. CloudShare's simple interface and reasonable pricing make it my go-to solution.",
         rating: 5
-    }
-];
-
-const pricingPlans = [
-    {
-        name: "Basic",
-        price: "$9.99/month",
-        features: [
-            "10 GB Storage",
-            "Basic Support",
-            "Single User"
-        ]
     },
     {
-        name: "Pro",
-        price: "$19.99/month",
-        features: [
-            "100 GB Storage",
-            "Priority Support",
-            "Up to 5 Users"
-        ]
+        name: "Priya Sharma",
+        role: "Project Manager",
+        company: "TechSolutions Ltd.",
+        image: "https://randomuser.me/api/portraits/women/65.jpg",
+        quote: "Managing project files across multiple teams used to be a nightmare until we found CloudShare. Now everything is organized and accessible exactly when we need it.",
+        rating: 4
     }
 ];
-
-const faqs = [
+//side menu bar options
+export const SIDE_MENU_DATA = [
     {
-        question: "How do I upload files?",
-        answer: "You can upload files by dragging and dropping them into the upload area or by clicking the upload button to select files from your device."
+        id: "01",
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        path: "/dashboard",
     },
     {
-        question: "Is my data secure?",
-        answer: "Yes, we use end-to-end encryption to ensure that your data is secure and protected from unauthorized access."
+        id: "02",
+        label: "Upload",
+        icon: Upload,
+        path: "/upload",
     },
     {
-        question: "Can I share files with others?",
-        answer: "Absolutely! You can share files with others by generating a secure link or by inviting them to collaborate on specific files or folders."
+        id: "03",
+        label: "My Files",
+        icon: Files,
+        path: "/my-files",
+    },
+    {
+        id: "04",
+        label: "Subscription",
+        icon: CreditCard,
+        path: "/subscriptions",
+    },
+    {
+        id: "05",
+        label: "Transactions",
+        icon: Receipt,
+        path: "/transactions",
     }
 ];
-export default testimonials;
-export { features, pricingPlans, faqs };
