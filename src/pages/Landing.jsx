@@ -20,7 +20,7 @@ const Landing = () => {
       <PricingSection pricingPlans={pricingPlans} />
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      <TestimonialsSection testimonials={testimonials}/>
 
       {/* CTA Section */}
       <CTASection />
