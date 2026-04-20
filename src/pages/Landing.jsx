@@ -6,7 +6,7 @@ import TestimonialsSection from "../components/landing/TestimonialsSection";
 import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
 
-import {features, pricingPlans, testimonials} from "../assets/data.js";
+import { features, pricingPlans, testimonials } from "../assets/data.js";
 const Landing = () => {
   return (
     <div className="landing-page bg-gradient-to-b from-gray-50 to-gray-100">
@@ -17,7 +17,7 @@ const Landing = () => {
       <FeaturesSection features={features} />
 
       {/* Pricing Section */}
-      <PricingSection />
+      <PricingSection pricingPlans={pricingPlans} />
 
       {/* Testimonials Section */}
       <TestimonialsSection />
