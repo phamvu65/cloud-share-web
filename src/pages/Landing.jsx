@@ -17,13 +17,13 @@ const Landing = () => {
       <FeaturesSection features={features} />
 
       {/* Pricing Section */}
-      <PricingSection pricingPlans={pricingPlans} />
+      <PricingSection pricingPlans={pricingPlans}  />
 
       {/* Testimonials Section */}
-      <TestimonialsSection testimonials={testimonials}/>
+      <TestimonialsSection testimonials={testimonials} />
 
       {/* CTA Section */}
-      <CTASection />
+      <CTASection  />
 
       {/* Footer Section*/}
       <Footer />
