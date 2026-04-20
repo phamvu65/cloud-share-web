@@ -1,6 +1,6 @@
-import {assets} from "../../assets/assets.js";
+import { assets } from "../../assets/assets.js";
 
-const HeroSection = ({openSignIn, openSignUp}) => {
+const HeroSection = ({ openSignIn, openSignUp }) => {
     return (
         <div className="landing-page-content relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-indigo-50 opacity-80 z-0 pointer-events-none"></div>
