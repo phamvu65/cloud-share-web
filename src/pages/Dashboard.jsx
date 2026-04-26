@@ -3,9 +3,8 @@ import DashboardLayout from "../layout/DashBoardLayout";
 
 const Dashboard = () => {
   return (
-    <DashboardLayout>
+    <DashboardLayout activeMenu="Dashboard">
       <div>
-        <UserButton> </UserButton>
       </div>
     </DashboardLayout>
   );
