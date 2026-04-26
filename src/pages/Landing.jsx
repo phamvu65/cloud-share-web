@@ -39,7 +39,7 @@ const Landing = () => {
       <CTASection openSignUp={openSignUp} />
 
       {/* Footer Section*/}
-      <Footer openSignUp={openSignUp} />
+      <Footer  />
     </div>
   )
 }
