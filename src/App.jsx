@@ -6,10 +6,12 @@ import MyFiles from "./pages/MyFiles.jsx";
 import Subscription from "./pages/Subscription.jsx";
 import Transactions from "./pages/Transactions.jsx";
 import { RedirectToSignIn, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
     <BrowserRouter>
+    <Toaster  />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={

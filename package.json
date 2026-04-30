@@ -14,9 +14,12 @@
     "@clerk/react": "^6.4.2",
     "@tailwindcss/vite": "^4.2.2",
     "axios": "^1.14.0",
+    "install": "^0.13.0",
     "lucide-react": "^1.7.0",
+    "npm": "^11.13.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.14.0",
     "tailwindcss": "^4.2.2"
   },
