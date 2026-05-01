@@ -12,22 +12,38 @@ const MyFiles = () => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
+  //fetching the files for a logged in user
   const fetchFiles = async () => {
     try {
       const token = await getToken();
       // Ensure your backend endpoint is correct. Previously it was apiEndpoints.FETCH_FILES
-      const response = await axios.get('http://localhost:8080/api/v1.0/files/my', { 
-        headers: { Authorization: `Bearer ${token}` } 
+      const response = await axios.get('http://localhost:8080/api/v1.0/files/my', {
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (response.status === 200) {
-         // Assuming the backend returns the array directly, or response.data.files
-        setFiles(response.data.files || response.data); 
+        // Assuming the backend returns the array directly, or response.data.files
+        console.log(response.data);
+        setFiles(response.data.files || response.data);
       }
     } catch (error) {
       console.error('Error fetching the files from server: ', error);
       toast.error('Error fetching the files from server: ' + error.message);
     }
   }
+
+  //Toggles the public/private status of a file
+  const togglePublic = async (fileToUpdate) => {
+    try {
+      const token = await getToken();
+      await axios.patch(`http://localhost:8080/api/v1.0/files/${fileToUpdate.id}/toggle-public`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      console.log('data', fileToUpdate);
+      setFiles(files.map((file) => file.id === fileToUpdate.id ? { ...file, isPublic: !file.isPublic } : file));
+    } catch (error) {
+      console.error('Error toggling file status', error);
+      toast.error('Error toggling file status: ', error.message);
+    }
+  }
+
 
   useEffect(() => {
     fetchFiles();
@@ -104,7 +120,9 @@ const MyFiles = () => {
                     {/* Visibility */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       <div className="flex items-center gap-4">
-                        <button onClick={() => onTogglePublic(file)} className="flex items-center gap-2 cursor-pointer group">
+                        <button
+                          onClick={() => togglePublic(file)}
+                          className="flex items-center gap-2 cursor-pointer group">
                           {file.isPublic ? (
                             <><Globe size={16} className="text-green-500" /><span className="group-hover:underline">Public</span></>
                           ) : (
@@ -112,7 +130,9 @@ const MyFiles = () => {
                           )}
                         </button>
                         {file.isPublic && (
-                          <button onClick={() => onShareLink(file.id)} className="flex items-center gap-2 cursor-pointer group text-blue-600">
+                          <button
+                            onClick={() => onShareLink(file.id)}
+                            className="flex items-center gap-2 cursor-pointer group text-blue-600">
                             <Copy size={16} />
                             <span className="group-hover:underline">Share</span>
                           </button>
@@ -122,10 +142,21 @@ const MyFiles = () => {
                     {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex justify-center gap-4">
-                        <button onClick={() => onDownload(file)} title="Download" className="text-gray-500 hover:text-blue-600"><Download size={18} /></button>
-                        <button onClick={() => onDelete(file.id)} title="Delete" className="text-gray-500 hover:text-red-600"><Trash2 size={18} /></button>
+                        <button
+                          onClick={() => onDownload(file)}
+                          title="Download" className="text-gray-500 hover:text-blue-600">
+                          <Download size={18} />
+                        </button>
+                        <button
+                          onClick={() => onDelete(file.id)}
+                          title="Delete" className="text-gray-500 hover:text-red-600">
+                          <Trash2 size={18} />
+                        </button>
                         {file.isPublic ? (
-                           <a href={`/file/${file.id}`} title="View File" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-blue-600"><Eye size={18} /></a>
+                          <a href={`/file/${file.id}`}
+                            title="View File" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-blue-600">
+                            <Eye size={18} />
+                          </a>
                         ) : <span className="w-[18px]"></span>}
                       </div>
                     </td>
@@ -139,22 +170,22 @@ const MyFiles = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {files.map((file) => (
               <div key={file.id} className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col">
-                 <div className="flex items-center justify-between mb-4">
-                    <File size={32} className="text-blue-600" />
-                    <button onClick={() => onTogglePublic(file)} className="p-1 rounded hover:bg-gray-100">
-                        {file.isPublic ? <Globe size={16} className="text-green-500" /> : <Lock size={16} className="text-gray-500" />}
-                    </button>
-                 </div>
-                 <h4 className="font-medium text-gray-800 truncate mb-1" title={file.name}>{file.name}</h4>
-                 <p className="text-xs text-gray-500 mb-4">{(file.size / 1024).toFixed(1)} KB • {new Date(file.uploadedAt).toLocaleDateString()}</p>
-                 
-                 <div className="mt-auto flex justify-end gap-3 pt-3 border-t">
-                     {file.isPublic && (
-                        <button onClick={() => onShareLink(file.id)} title="Share" className="text-gray-500 hover:text-blue-600"><Copy size={16} /></button>
-                     )}
-                     <button onClick={() => onDownload(file)} title="Download" className="text-gray-500 hover:text-blue-600"><Download size={16} /></button>
-                     <button onClick={() => onDelete(file.id)} title="Delete" className="text-gray-500 hover:text-red-600"><Trash2 size={16} /></button>
-                 </div>
+                <div className="flex items-center justify-between mb-4">
+                  <File size={32} className="text-blue-600" />
+                  <button onClick={() => togglePublic(file)} className="p-1 rounded hover:bg-gray-100">
+                    {file.isPublic ? <Globe size={16} className="text-green-500" /> : <Lock size={16} className="text-gray-500" />}
+                  </button>
+                </div>
+                <h4 className="font-medium text-gray-800 truncate mb-1" title={file.name}>{file.name}</h4>
+                <p className="text-xs text-gray-500 mb-4">{(file.size / 1024).toFixed(1)} KB • {new Date(file.uploadedAt).toLocaleDateString()}</p>
+
+                <div className="mt-auto flex justify-end gap-3 pt-3 border-t">
+                  {file.isPublic && (
+                    <button onClick={() => onShareLink(file.id)} title="Share" className="text-gray-500 hover:text-blue-600"><Copy size={16} /></button>
+                  )}
+                  <button onClick={() => onDownload(file)} title="Download" className="text-gray-500 hover:text-blue-600"><Download size={16} /></button>
+                  <button onClick={() => onDelete(file.id)} title="Delete" className="text-gray-500 hover:text-red-600"><Trash2 size={16} /></button>
+                </div>
               </div>
             ))}
           </div>
