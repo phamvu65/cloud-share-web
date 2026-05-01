@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 import { apiEndpoints } from "../util/apiEndpoints.js";
 import { useNavigate } from "react-router-dom";
 import Modal from "../components/Modal.jsx";
+import ConfirmationDialog from "../components/ConfirmationDialog.jsx";
+import LinkShareModal from "../components/LinkShareModal.jsx";
 const MyFiles = () => {
   const [files, setFiles] = useState([]);
   const [viewMode, setViewMode] = useState("list");
@@ -14,6 +16,11 @@ const MyFiles = () => {
   const [fileToDelete, setFileToDelete] = useState(null);
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const [shareModal,setShareModal] = useState({
+    isOpen: false,
+    fileId: null,
+    link:""
+  });
 
   //fetching the files for a logged in user
   const fetchFiles = async () => {
@@ -89,6 +96,16 @@ const MyFiles = () => {
     }
   }
 
+  //opens the share link modal
+  const openShareModal = (fileId) => {
+    const link = `${window.location.origin}/file/${fileId}`;
+    setShareModal({ isOpen: true, fileId, link });
+  };
+
+  //closes the share link modal
+  const closeShareModal = () => {
+    setShareModal({ isOpen: false, fileId: null, link: "" });
+  };
 
     useEffect(() => {
       fetchFiles();
@@ -170,7 +187,7 @@ const MyFiles = () => {
                           </button>
                           {file.isPublic && (
                             <button
-                              onClick={() => onShareLink(file.id)}
+                              onClick={() => setShareModal({ isOpen: true, link: `${window.location.origin}/file/${file.id}` })}
                               className="flex items-center gap-2 cursor-pointer group text-blue-600">
                               <Copy size={16} />
                               <span className="group-hover:underline">Share</span>
@@ -220,7 +237,7 @@ const MyFiles = () => {
 
                   <div className="mt-auto flex justify-end gap-3 pt-3 border-t">
                     {file.isPublic && (
-                      <button onClick={() => onShareLink(file.id)} title="Share" className="text-gray-500 hover:text-blue-600"><Copy size={16} /></button>
+                      <button onClick={() => setShareModal({ isOpen: true, link: `${window.location.origin}/file/${file.id}` })} title="Share" className="text-gray-500 hover:text-blue-600"><Copy size={16} /></button>
                     )}
                     <button onClick={() => handleDownload(file)} title="Download" className="text-gray-500 hover:text-blue-600"><Download size={16} /></button>
                     <button onClick={() => handleDelete(file)} title="Delete" className="text-gray-500 hover:text-red-600"><Trash2 size={16} /></button>
@@ -244,6 +261,14 @@ const MyFiles = () => {
             This action cannot be undone and the file will be permanently removed from our servers.
           </div>
         </Modal>
+
+      {/* Share Link Modal */}
+      <LinkShareModal
+        isOpen={shareModal.isOpen}
+        onClose={() => setShareModal({ isOpen: false, link: "" })}
+        link={shareModal.link}
+        title="Share File"
+      />
       </DashboardLayout>
     )
   }
