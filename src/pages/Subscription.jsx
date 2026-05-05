@@ -22,7 +22,7 @@ const Subscription = () => {
             id: "premium",
             name: "Premium",
             credits: 500,
-            price: 5,
+            price: 25,
             features: ["Upload up to 500 files", "Access to all basic features", "Priority support"],
             recommended: false
         },
@@ -30,7 +30,7 @@ const Subscription = () => {
             id: "ultimate",
             name: "Ultimate",
             credits: 5000,
-            price: 25,
+            price: 50,
             features: ["Upload up to 5000 files", "Access to all premium features", "Priority support", "Advanced analytics"],
             recommended: true
         }
