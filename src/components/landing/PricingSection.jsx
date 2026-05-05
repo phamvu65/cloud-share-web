@@ -32,7 +32,7 @@ const PricingSection = ({pricingPlans, openSignUp}) => {
                                 </p>
                                 <p className="mt-8">
                                     <span className="text-4xl font-extrabold text-gray-900">
-                                        ₹{plan.price}
+                                        ${plan.price}
                                     </span>
                                 </p>
                             </div>

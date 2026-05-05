@@ -55,7 +55,7 @@ export const pricingPlans = [
     },
     {
         name: "Premium",
-        price: "500",
+        price: "25",
         description: "For individuals with larger needs",
         features: [
             "500 file uploads",
@@ -69,7 +69,7 @@ export const pricingPlans = [
     },
     {
         name: "Ultimate",
-        price: "2500",
+        price: "50",
         description: "For teams and businesses",
         features: [
             "5000 file uploads",
