@@ -1,19 +1,18 @@
 import DashboardLayout from "../layout/DashboardLayout.jsx";
 import {useContext, useState} from "react";
-import {useAuth} from "@clerk/clerk-react";
 import {UserCreditsContext} from "../context/UserCreditsContext.jsx";
 import {AlertCircle} from "lucide-react";
 import axios from "axios";
 import {apiEndpoints} from "../util/apiEndpoints.js";
 import UploadBox from "../components/UploadBox.jsx";
-
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Upload = () => {
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState(""); //success or error
-    const {getToken} = useAuth();
+    const { token } = useAuth();
     const {credits, setCredits} = useContext(UserCreditsContext);
     const MAX_FILES = 5;
 
@@ -59,7 +58,6 @@ const Upload = () => {
         files.forEach((file) => formData.append("files", file));
 
         try {
-            const token = await getToken();
             const response = await axios.post(apiEndpoints.UPLOAD_FILE, formData, {headers: {"Content-Type": "multipart/form-data", Authorization: `Bearer ${token}`}});
 
             if (response.data && response.data.remainingCredits !== undefined) {

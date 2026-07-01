@@ -1,14 +1,15 @@
-import {use, useContext, useEffect, useState} from "react";
-import {Menu, Share2, Wallet, X} from "lucide-react";
+import {useContext, useEffect, useState} from "react";
+import {Menu, Share2, X, LogOut, User} from "lucide-react";
 import {Link} from "react-router-dom";
-import {SignedIn, UserButton} from "@clerk/clerk-react";
 import SideMenu from "./SideMenu.jsx";
 import CreditsDisplay from "./CreditsDisplay.jsx";
 import { UserCreditsContext } from "../context/UserCreditsContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Navbar = ({activeMenu}) => {
     const [openSideMenu, setOpenSideMenu] = useState(false);
     const {credits,fetchUserCredits} = useContext(UserCreditsContext);
+    const { isAuthenticated, user, logout } = useAuth();
 
     useEffect(() => {
         fetchUserCredits();
@@ -37,16 +38,20 @@ const Navbar = ({activeMenu}) => {
             </div>
 
             {/* Right side - credits and user button*/}
-            <SignedIn>
+            {isAuthenticated && (
                 <div className="flex items-center gap-4">
                     <Link to="/subscriptions">
                         <CreditsDisplay credits={credits} />
                     </Link>
                     <div className="relative">
-                        <UserButton />
+                        {/* A simple user menu replacement for UserButton */}
+                        <button onClick={logout} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+                            <User size={20} />
+                            <LogOut size={20} title="Log Out" />
+                        </button>
                     </div>
                 </div>
-            </SignedIn>
+            )}
 
             {/* Mobile side menu */}
             {openSideMenu && (

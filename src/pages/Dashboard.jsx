@@ -1,5 +1,4 @@
 import DashboardLayout from "../layout/DashboardLayout.jsx";
-import {useAuth} from "@clerk/clerk-react";
 import {useContext, useEffect, useState} from "react";
 import {UserCreditsContext} from "../context/UserCreditsContext.jsx";
 import axios from "axios";
@@ -7,6 +6,7 @@ import {apiEndpoints} from "../util/apiEndpoints.js";
 import {Loader2} from "lucide-react";
 import DashboardUpload from "../components/DashboardUpload.jsx";
 import RecentFiles from "../components/RecentFiles.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Dashboard = () => {
     const [files, setFiles] = useState([]);
@@ -16,15 +16,15 @@ const Dashboard = () => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('');
     const [remainingUploads, setRemainingUploads] = useState(5);
-    const {getToken} = useAuth();
+    const { token, isLoading: isAuthLoading } = useAuth();
     const { fetchUserCredits } = useContext(UserCreditsContext);
     const MAX_FILES = 5;
 
     useEffect(() => {
         const fetchRecentFiles = async () => {
+            if (!token) return;
             setLoading(true);
             try {
-                const token = await getToken();
                 // Use the existing endpoint that we know works
                 const res = await axios.get(apiEndpoints.FETCH_FILES, {
                     headers: {
@@ -44,7 +44,7 @@ const Dashboard = () => {
             }
         };
         fetchRecentFiles();
-    }, [getToken]);
+    }, [token]);
 
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
@@ -96,7 +96,6 @@ const Dashboard = () => {
         uploadFiles.forEach(file => formData.append('files', file));
 
         try {
-            const token = await getToken();
             const response = await axios.post(apiEndpoints.UPLOAD_FILE, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -132,6 +131,10 @@ const Dashboard = () => {
             setUploading(false);
         }
     };
+
+    if (isAuthLoading) {
+        return <DashboardLayout activeMenu="Dashboard"><div className="p-6">Loading...</div></DashboardLayout>;
+    }
 
     return (
         <DashboardLayout activeMenu="Dashboard">

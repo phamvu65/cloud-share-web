@@ -1,7 +1,6 @@
 import DashboardLayout from "../layout/DashboardLayout.jsx";
 import { useEffect, useState } from "react";
 import { Download, File, Grid, List, Trash2, Globe, Lock, Copy, Eye } from "lucide-react"; // Added missing imports
-import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { apiEndpoints } from "../util/apiEndpoints.js";
@@ -9,12 +8,13 @@ import { useNavigate } from "react-router-dom";
 import Modal from "../components/Modal.jsx";
 import ConfirmationDialog from "../components/ConfirmationDialog.jsx";
 import LinkShareModal from "../components/LinkShareModal.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 const MyFiles = () => {
   const [files, setFiles] = useState([]);
   const [viewMode, setViewMode] = useState("list");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
-  const { getToken } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const [shareModal,setShareModal] = useState({
     isOpen: false,
@@ -24,8 +24,8 @@ const MyFiles = () => {
 
   //fetching the files for a logged in user
   const fetchFiles = async () => {
+    if (!token) return;
     try {
-      const token = await getToken();
       // Ensure your backend endpoint is correct. Previously it was apiEndpoints.FETCH_FILES
       const response = await axios.get(apiEndpoints.FETCH_FILES, {
         headers: { Authorization: `Bearer ${token}` }
@@ -43,8 +43,8 @@ const MyFiles = () => {
 
   //Toggles the public/private status of a file
   const togglePublic = async (fileToUpdate) => {
+    if (!token) return;
     try {
-      const token = await getToken();
       await axios.patch(apiEndpoints.TOGGLE_FILE(fileToUpdate.id), {}, { headers: { Authorization: `Bearer ${token}` } });
       console.log('data', fileToUpdate);
       setFiles(files.map((file) => file.id === fileToUpdate.id ? { ...file, isPublic: !file.isPublic } : file));
@@ -56,8 +56,8 @@ const MyFiles = () => {
 
   //Handle file download
   const handleDownload = async (file) => {
+    if (!token) return;
     try {
-      const token = await getToken();
       const response = await axios.get(apiEndpoints.DOWNLOAD_FILE(file.id), { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
 
       // create a blob url and trigger download
@@ -82,8 +82,8 @@ const MyFiles = () => {
   }
 
   const confirmDelete = async () => {
+    if (!token) return;
     try {
-      const token = await getToken();
       await axios.delete(apiEndpoints.DELETE_FILE(fileToDelete.id), { headers: { Authorization: `Bearer ${token}` } });
       setFiles(files.filter((file) => file.id !== fileToDelete.id));
       toast.success('File deleted successfully');
@@ -109,7 +109,7 @@ const MyFiles = () => {
 
     useEffect(() => {
       fetchFiles();
-    }, [getToken]);
+    }, [token]);
 
     return (
       <DashboardLayout activeMenu="My Files">

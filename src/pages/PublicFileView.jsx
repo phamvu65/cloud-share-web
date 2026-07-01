@@ -1,12 +1,11 @@
 import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
-import {useAuth} from "@clerk/clerk-react";
 import axios from "axios";
 import {apiEndpoints} from "../util/apiEndpoints.js";
 import toast from "react-hot-toast";
 import {Copy, Download, File, Info, Share2} from "lucide-react";
 import LinkShareModal from "../components/LinkShareModal.jsx";
-
+// No longer needs useAuth as this is a public page
 const PublicFileView = () => {
     const [file, setFile] = useState(null);
     const [error, setError] = useState(null);
@@ -15,7 +14,6 @@ const PublicFileView = () => {
         isOpen: false,
         link: ""
     });
-    const {getToken} = useAuth();
     const {fileId} = useParams();
 
     useEffect(() => {
@@ -38,7 +36,7 @@ const PublicFileView = () => {
             }
         };
         getFile();
-    }, [fileId, getToken]);
+    }, [fileId]);
 
     const handleDownload = async () => {
         try {

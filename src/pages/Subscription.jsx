@@ -1,11 +1,11 @@
 import DashboardLayout from "../layout/DashboardLayout.jsx";
 import {useContext, useEffect, useState} from "react";
-import {useAuth, useUser} from "@clerk/clerk-react";
 import {UserCreditsContext} from "../context/UserCreditsContext.jsx";
 import axios from "axios";
 import {apiEndpoints} from "../util/apiEndpoints.js";
 import {AlertCircle, Check, CreditCard, Loader2} from "lucide-react";
 import {useSearchParams} from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Subscription = () => {
     const [processingPayment, setProcessingPayment] = useState(false);
@@ -13,8 +13,7 @@ const Subscription = () => {
     const [messageType, setMessageType] = useState("");
     const [searchParams] = useSearchParams(); // Không cần lấy setSearchParams nữa
 
-    const {getToken} = useAuth();
-    const {isLoaded} = useUser();
+    const { token, isLoading: isAuthLoading } = useAuth();
     const {credits, setCredits} = useContext(UserCreditsContext);
 
     const plans = [
@@ -36,15 +35,15 @@ const Subscription = () => {
         }
     ];
 
-    if (!isLoaded) {
+    if (isAuthLoading) {
         return <DashboardLayout activeMenu="Subscription"><div className="p-6">Loading...</div></DashboardLayout>;
     }
 
     // Fetch credits on mount
     useEffect(() => {
         const loadCredits = async () => {
+            if (!token) return;
             try {
-                const token = await getToken();
                 const response = await axios.get(apiEndpoints.GET_CREDITS, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -54,7 +53,7 @@ const Subscription = () => {
             }
         };
         loadCredits();
-    }, [getToken, setCredits]);
+    }, [token, setCredits]);
 
     // Xử lý payment return - chỉ chạy 1 lần
     useEffect(() => {
@@ -65,9 +64,8 @@ const Subscription = () => {
             sessionStorage.setItem("payment_processed", "true");
 
             (async () => {
+                if (!token) return;
                 try {
-                    const token = await getToken();
-
                     if (status === "success") {
                         setMessage("Payment successful! Your credits have been added.");
                         setMessageType("success");
@@ -91,14 +89,13 @@ const Subscription = () => {
                 }
             })();
         }
-    }, [searchParams, getToken, setCredits]);
+    }, [searchParams, token, setCredits]);
 
     const handlePurchase = async (plan) => {
         setProcessingPayment(true);
         setMessage('');
 
         try {
-            const token = await getToken();
             const response = await axios.post(apiEndpoints.CREATE_ORDER, {
                 planId: plan.id,
                 amount: plan.price,

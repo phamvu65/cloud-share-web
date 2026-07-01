@@ -1,14 +1,14 @@
-import {useUser} from "@clerk/clerk-react";
 import Navbar from "../components/Navbar.jsx";
 import SideMenu from "../components/SideMenu.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const DashboardLayout = ({children, activeMenu}) => {
-    const {user} = useUser();
+    const { user, isAuthenticated } = useAuth();
     return (
         <div>
             {/* Navbar component goes here*/}
             <Navbar activeMenu={activeMenu}/>
-            {user && (
+            {isAuthenticated && user && (
                 <div className="flex">
                     <div className="max-[1080px]:hidden">
                         {/* Sidemenu goes here */}

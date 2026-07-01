@@ -1,25 +1,24 @@
 import {createContext, useCallback, useEffect, useState} from "react";
-import {useAuth} from "@clerk/clerk-react";
 import axios from "axios";
 import {apiEndpoints} from "../util/apiEndpoints.js";
 import toast from "react-hot-toast";
+import { useAuth } from "./AuthContext.jsx";
 
 export const UserCreditsContext = createContext();
 
 export const UserCreditsProvider = ({children}) => {
     const [credits, setCredits] = useState(5);
     const [loading, setLoading] = useState(false);
-    const {getToken, isSignedIn} = useAuth();
+    const { token, isAuthenticated } = useAuth();
 
 
     //Function to fetch the user credits that can be called from anywhere
     const fetchUserCredits = useCallback(async () => {
-        if (!isSignedIn) return;
+        if (!isAuthenticated || !token) return;
 
         setLoading(true);
 
         try {
-            const token = await getToken();
             const response = await axios.get(apiEndpoints.GET_CREDITS, {headers: {Authorization: `Bearer ${token}`}});
             if (response.status === 200) {
                 setCredits(response.data.credits);
@@ -31,12 +30,13 @@ export const UserCreditsProvider = ({children}) => {
         }finally {
             setLoading(false);
         }
-    },[getToken, isSignedIn]);
+    },[token, isAuthenticated]);
 
     useEffect(() => {
-        if (isSignedIn)
+        if (isAuthenticated) {
             fetchUserCredits();
-    }, [fetchUserCredits, isSignedIn]);
+        }
+    }, [fetchUserCredits, isAuthenticated]);
 
 
     const updateCredits = useCallback(newCredits => {

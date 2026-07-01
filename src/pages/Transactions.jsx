@@ -1,21 +1,21 @@
 import DashboardLayout from "../layout/DashboardLayout.jsx";
 import {useEffect, useState} from "react";
-import {useAuth} from "@clerk/clerk-react";
 import axios from "axios";
 import {apiEndpoints} from "../util/apiEndpoints.js";
 import {AlertCircle, Loader2, Receipt} from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Transactions = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const {getToken} = useAuth();
+    const { token } = useAuth();
 
     useEffect(() => {
         const fetchTransactions = async () => {
+            if (!token) return;
             try {
                 setLoading(true);
-                const token = await getToken();
                 const response = await axios.get(
                     apiEndpoints.TRANSACTIONS,
                     {
@@ -36,7 +36,7 @@ const Transactions = () => {
             }
         };
         fetchTransactions();
-    }, [getToken]);
+    }, [token]);
 
     const formatDate = (dateString) => {
         const options = {
