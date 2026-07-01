@@ -7,19 +7,25 @@ import Footer from "../components/landing/Footer";
 
 import { features, pricingPlans, testimonials } from "../assets/data.js";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext.jsx";
+import LoginModal from "../components/LoginModal.jsx";
 
 const Landing = () => {
-  const { openSignIn, openSignUp } = useClerk();
-  const { isSignedIn } = useUser();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
     useEffect(() => {
-        if (isSignedIn) {
+        if (isAuthenticated) {
             navigate("/dashboard");
         }
-    }, [isSignedIn, navigate]);
+    }, [isAuthenticated, navigate]);
+
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    // Mở modal đăng nhập thay vì điều hướng
+    const openSignIn = () => setIsLoginModalOpen(true);
+    const openSignUp = () => navigate('/register');
 
   return (
     <div className="landing-page bg-gradient-to-b from-gray-50 to-gray-100">
@@ -40,6 +46,8 @@ const Landing = () => {
 
       {/* Footer Section*/}
       <Footer  />
+
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </div>
   )
 }
