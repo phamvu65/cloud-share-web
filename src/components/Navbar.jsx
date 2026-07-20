@@ -3,17 +3,22 @@ import {Menu, Share2, X, LogOut, User} from "lucide-react";
 import {Link} from "react-router-dom";
 import SideMenu from "./SideMenu.jsx";
 import CreditsDisplay from "./CreditsDisplay.jsx";
+import AuthModal from "./AuthModal.jsx";
 import { UserCreditsContext } from "../context/UserCreditsContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const Navbar = ({activeMenu}) => {
     const [openSideMenu, setOpenSideMenu] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState('signin');
     const {credits,fetchUserCredits} = useContext(UserCreditsContext);
-    const { isAuthenticated, user, logout } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
 
     useEffect(() => {
-        fetchUserCredits();
-    }, [fetchUserCredits]);
+        if (isAuthenticated) {
+            fetchUserCredits();
+        }
+    }, [isAuthenticated, fetchUserCredits]);
 
     return (
         <div className="flex items-center justify-between gap-5 bg-white border border-b border-gray-200/50 backdrop-blur-[2px] py-4 px-4 sm:px-7 sticky top-0 z-30">
@@ -37,7 +42,7 @@ const Navbar = ({activeMenu}) => {
                 </div>
             </div>
 
-            {/* Right side - credits and user button*/}
+            {/* Right side - Authenticated View */}
             {isAuthenticated && (
                 <div className="flex items-center gap-4">
                     <Link to="/subscriptions">
@@ -53,6 +58,30 @@ const Navbar = ({activeMenu}) => {
                 </div>
             )}
 
+            {/* Right side - Unauthenticated View */}
+            {!isAuthenticated && (
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {
+                            setAuthMode('signin');
+                            setIsAuthModalOpen(true);
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+                    >
+                        Đăng nhập
+                    </button>
+                    <button
+                        onClick={() => {
+                            setAuthMode('signup');
+                            setIsAuthModalOpen(true);
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
+                    >
+                        Đăng ký
+                    </button>
+                </div>
+            )}
+
             {/* Mobile side menu */}
             {openSideMenu && (
                 <div className="fixed top-[73px] left-0 right-0 bg-white border-b border-gray-200 lg:hidden z-20">
@@ -60,6 +89,13 @@ const Navbar = ({activeMenu}) => {
                     <SideMenu activeMenu={activeMenu}/>
                 </div>
             )}
+
+            {/* Authentication Modal */}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                initialMode={authMode}
+                onClose={() => setIsAuthModalOpen(false)}
+            />
         </div>
     )
 }

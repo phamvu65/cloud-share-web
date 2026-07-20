@@ -9,9 +9,7 @@ import {Toaster} from "react-hot-toast";
 import {UserCreditsProvider} from "./context/UserCreditsContext.jsx";
 import PublicFileView from "./pages/PublicFileView.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
-import Login from "./pages/Login.jsx";
-// Giả sử bạn có trang Register.jsx
-// import Register from "./pages/Register.jsx";
+
 
 const App = () => {
     return (
@@ -21,10 +19,7 @@ const App = () => {
                 <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Landing />} />
-                    <Route path="/login" element={<Login />} />
-                    {/* <Route path="/register" element={<Register />} /> */}
                     <Route path="/file/:fileId" element={<PublicFileView />} />
-
                     {/* Private Routes */}
                     <Route element={<PrivateRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />

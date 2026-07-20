@@ -6,10 +6,10 @@ import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
 
 import { features, pricingPlans, testimonials } from "../assets/data.js";
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import LoginModal from "../components/LoginModal.jsx";
+import AuthModal from "../components/AuthModal.jsx";
 
 const Landing = () => {
   const { isAuthenticated } = useAuth();
@@ -21,11 +21,17 @@ const Landing = () => {
         }
     }, [isAuthenticated, navigate]);
 
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState('signin');
 
-    // Mở modal đăng nhập thay vì điều hướng
-    const openSignIn = () => setIsLoginModalOpen(true);
-    const openSignUp = () => navigate('/register');
+    const openSignIn = () => {
+        setAuthMode('signin');
+        setIsAuthModalOpen(true);
+    };
+    const openSignUp = () => {
+        setAuthMode('signup');
+        setIsAuthModalOpen(true);
+    };
 
   return (
     <div className="landing-page bg-gradient-to-b from-gray-50 to-gray-100">
@@ -47,7 +53,11 @@ const Landing = () => {
       {/* Footer Section*/}
       <Footer  />
 
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <AuthModal
+          isOpen={isAuthModalOpen}
+          initialMode={authMode}
+          onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   )
 }
