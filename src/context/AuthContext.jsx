@@ -63,6 +63,46 @@ export const AuthProvider = ({ children }) => {
         }
     };
  
+    const loginWithGoogle = async (idToken) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/auth/google`, { idToken });
+            const { accessToken, refreshToken, userId, email } = response.data;
+ 
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+            setToken(accessToken);
+            setUser({ email, id: userId });
+            setIsAuthenticated(true);
+            return response.data;
+        } catch (error) {
+            setIsAuthenticated(false);
+            throw error;
+        }
+    };
+ 
+    const register = async (firstName, lastName, email, password, username) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/auth/register`, {
+                firstName,
+                lastName,
+                email,
+                password,
+                username,
+            });
+            const data = response.data;
+            if (data.accessToken && data.refreshToken) {
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('refreshToken', data.refreshToken);
+                setToken(data.accessToken);
+                setUser({ email, id: data.userId ?? data.user?.id });
+                setIsAuthenticated(true);
+            }
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    };
+ 
     const logout = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -72,7 +112,16 @@ export const AuthProvider = ({ children }) => {
         window.location.href = '/';
     };
     return (
-        <AuthContext.Provider value={{ user, token, isAuthenticated, isLoading, login, logout }}>
+        <AuthContext.Provider value={{
+            user,
+            token,
+            isAuthenticated,
+            isLoading,
+            login,
+            logout,
+            register,
+            loginWithGoogle,
+        }}>
             {children}
         </AuthContext.Provider>
     );
