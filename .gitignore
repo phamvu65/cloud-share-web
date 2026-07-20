@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 .env
+
+# AI Agent & Skills
+.agents/
+.claude/
+skills-lock.json
