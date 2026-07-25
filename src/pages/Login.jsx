@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import googleIcon from '../assets/google.svg';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ const Login = () => {
         setError('');
         setLoading(true);
         try {
-            await login(email, password);
+            await login(identifier, password);
             navigate('/dashboard');
         } catch (err) {
             setError('Login failed. Please check your credentials.');
@@ -82,6 +82,9 @@ const Login = () => {
             client_id: googleClientId,
             callback: handleGoogleResponse,
             ux_mode: 'popup',
+            auto_select: false,
+            cancel_on_tap_outside: false,
+            use_fedcm_for_prompt: false,
         });
         setGoogleInit(true);
     };
@@ -96,7 +99,26 @@ const Login = () => {
             return;
         }
         initGoogle();
-        window.google.accounts.id.prompt();
+        try {
+            window.google.accounts.id.prompt((notification) => {
+                if (notification?.isNotDisplayed?.()) {
+                    const reason = notification.getNotDisplayedReason?.();
+                    const friendlyMessage = reason === 'suppressed_by_user'
+                        ? 'Google sign-in was blocked by the browser. Please allow third-party sign-in and try again.'
+                        : 'Google sign-in is currently unavailable in this browser.';
+                    setError(friendlyMessage);
+                } else if (notification?.isSkippedMoment?.()) {
+                    const reason = notification.getSkippedReason?.();
+                    const friendlyMessage = reason === 'user_cancel'
+                        ? 'Google sign-in was canceled.'
+                        : 'Google sign-in was skipped. Please try again.';
+                    setError(friendlyMessage);
+                }
+            });
+        } catch (err) {
+            setError('Google sign-in is currently unavailable. Please try another browser or enable third-party sign-in.');
+            console.error(err);
+        }
     };
 
     return (
@@ -116,6 +138,9 @@ const Login = () => {
                         <img src={googleIcon} alt="Google" className="h-5 w-5" />
                         Continue with Google
                     </button>
+                    <p className="text-center text-xs text-gray-500">
+                        If Google popup is blocked, allow third-party sign-in in your browser settings and try again.
+                    </p>
 
                     <div className="flex items-center gap-3">
                         <span className="block h-px flex-1 bg-gray-200"></span>
@@ -126,10 +151,14 @@ const Login = () => {
                     {error && <p className="text-red-500 text-center text-sm">{error}</p>}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email-page">Địa chỉ email</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="identifier-page">Email or username</label>
                             <input
-                                type="email" id="email-page" value={email} onChange={(e) => setEmail(e.target.value)}
+                                type="text"
+                                id="identifier-page"
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                placeholder="Email or username"
                                 required
                             />
                         </div>

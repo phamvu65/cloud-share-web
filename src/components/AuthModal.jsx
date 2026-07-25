@@ -9,7 +9,7 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
@@ -30,7 +30,7 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
             setFirstName('');
             setLastName('');
             setUsername('');
-            setEmail('');
+            setIdentifier('');
             setPassword('');
             setShowPassword(false);
             setError('');
@@ -71,11 +71,11 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
 
         try {
             if (mode === 'signin') {
-                await login(email, password);
+                await login(identifier, password);
                 onClose();
                 navigate('/dashboard');
             } else {
-                await register(firstName, lastName, email, password, username);
+                await register(firstName, lastName, identifier, password, username);
                 setSuccessMessage('Đăng ký thành công! Vui lòng đăng nhập.');
                 setMode('signin');
                 setPassword('');
@@ -118,6 +118,9 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
             client_id: googleClientId,
             callback: handleGoogleResponse,
             ux_mode: 'popup',
+            auto_select: false,
+            cancel_on_tap_outside: false,
+            use_fedcm_for_prompt: false,
         });
         setGoogleInit(true);
     };
@@ -134,7 +137,26 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
         }
 
         initGoogle();
-        window.google.accounts.id.prompt();
+        try {
+            window.google.accounts.id.prompt((notification) => {
+                if (notification?.isNotDisplayed?.()) {
+                    const reason = notification.getNotDisplayedReason?.();
+                    const friendlyMessage = reason === 'suppressed_by_user'
+                        ? 'Google sign-in was blocked by the browser. Please allow third-party sign-in and try again.'
+                        : 'Google sign-in is currently unavailable in this browser.';
+                    setError(friendlyMessage);
+                } else if (notification?.isSkippedMoment?.()) {
+                    const reason = notification.getSkippedReason?.();
+                    const friendlyMessage = reason === 'user_cancel'
+                        ? 'Google sign-in was canceled.'
+                        : 'Google sign-in was skipped. Please try again.';
+                    setError(friendlyMessage);
+                }
+            });
+        } catch (err) {
+            setError('Google sign-in is currently unavailable. Please try another browser or enable third-party sign-in.');
+            console.error(err);
+        }
     };
 
     return (
@@ -170,6 +192,9 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                             <img src={googleIcon} alt="Google" className="h-5 w-5" />
                             Continue with Google
                         </button>
+                        <p className="text-center text-xs text-gray-500">
+                            If Google popup is blocked, allow third-party sign-in in your browser settings and try again.
+                        </p>
 
                         <div className="flex items-center gap-3 text-sm text-gray-500">
                             <span className="block h-px flex-1 bg-gray-200" />
@@ -222,14 +247,14 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                             )}
 
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
+                                <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Email or username</label>
                                 <input
-                                    id="email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    id="identifier"
+                                    type="text"
+                                    value={identifier}
+                                    onChange={(e) => setIdentifier(e.target.value)}
                                     className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                    placeholder="Enter your email address"
+                                    placeholder="Email or username"
                                     required
                                 />
                             </div>
