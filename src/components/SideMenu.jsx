@@ -10,9 +10,19 @@ const SideMenu = ({activeMenu}) => {
         <div className="w-64 h-[calc(100vh-61px)] bg-white border-r border-gray-200/50 p-5 sticky top-[61px] z-20">
 
             <div className="flex flex-col items-center justify-center gap-3 mt-3 mb-7">
-                {user && <User className="w-20 h-20 text-xl" />}
-                <h5 className="text-gray-950 font-medium leading-6">
-                    {user?.fullName || ""}
+                {user?.avatar ? (
+                    <img
+                        src={user.avatar}
+                        alt={user.displayName || user.email || 'User avatar'}
+                        className="h-20 w-20 rounded-full object-cover"
+                    />
+                ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                        <User className="h-10 w-10" />
+                    </div>
+                )}
+                <h5 className="text-gray-950 font-medium leading-6 text-center">
+                    {user?.displayName || user?.email?.split('@')[0] || "Unknown User"}
                 </h5>
             </div>
 
