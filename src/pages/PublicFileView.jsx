@@ -3,8 +3,9 @@ import {useParams} from "react-router-dom";
 import axios from "axios";
 import {apiEndpoints} from "../util/apiEndpoints.js";
 import toast from "react-hot-toast";
-import {Copy, Download, File, Info, Share2} from "lucide-react";
+import {Copy, Download, File, Info, Loader2, Music, Share2} from "lucide-react";
 import LinkShareModal from "../components/LinkShareModal.jsx";
+import { useFilePreview } from "../hooks/useFilePreview.js";
 // No longer needs useAuth as this is a public page
 const PublicFileView = () => {
     const [file, setFile] = useState(null);
@@ -15,6 +16,7 @@ const PublicFileView = () => {
         link: ""
     });
     const {fileId} = useParams();
+    const preview = useFilePreview();
 
     useEffect(() => {
         const getFile = async () => {
@@ -26,6 +28,7 @@ const PublicFileView = () => {
                 );
                 setFile(res.data);
                 setError(null);
+                preview.open(res.data, apiEndpoints.DOWNLOAD_FILE(fileId));
             } catch (err) {
                 console.error("Error fetching file:", err);
                 setError(
@@ -36,6 +39,8 @@ const PublicFileView = () => {
             }
         };
         getFile();
+        // preview.open is stable (useCallback with no deps) so it's safe to omit from deps here
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fileId]);
 
     const handleDownload = async () => {
@@ -117,12 +122,39 @@ const PublicFileView = () => {
 
             {/* Main Content */}
             <main className="container mx-auto p-4 md:p-8 flex justify-center">
-                <div className="w-full max-w-3xl">
+                <div className={`w-full ${preview.url ? 'max-w-4xl' : 'max-w-3xl'}`}>
                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center">
                         <div className="flex justify-center mb-4">
-                            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                                <File size={40} className="text-blue-500" />
-                            </div>
+                            {preview.kind === "image" && preview.url ? (
+                                <img
+                                    src={preview.url}
+                                    alt={file.name}
+                                    className="max-h-[85vh] w-full rounded-lg object-contain"
+                                />
+                            ) : preview.kind === "pdf" && preview.url ? (
+                                <iframe
+                                    src={preview.url}
+                                    title={file.name}
+                                    className="h-[85vh] w-full rounded-lg border-0"
+                                />
+                            ) : preview.kind === "video" && preview.url ? (
+                                <video src={preview.url} controls className="max-h-[85vh] w-full rounded-lg" />
+                            ) : preview.kind === "audio" && preview.url ? (
+                                <div className="flex w-full flex-col items-center gap-6 py-8">
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                        <Music size={32} />
+                                    </div>
+                                    <audio src={preview.url} controls className="w-full max-w-md" />
+                                </div>
+                            ) : preview.loading ? (
+                                <div className="flex h-20 w-20 items-center justify-center">
+                                    <Loader2 size={32} className="animate-spin text-blue-400" />
+                                </div>
+                            ) : (
+                                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <File size={40} className="text-blue-500" />
+                                </div>
+                            )}
                         </div>
 
                         <h1 className="text-2xl font-semibold text-gray-800 break-words">

@@ -1,6 +1,6 @@
 import DashboardLayout from "../layout/DashboardLayout.jsx";
 import { useEffect, useState } from "react";
-import { Download, File, Grid, List, Trash2, Globe, Lock, Copy, Eye } from "lucide-react"; // Added missing imports
+import { Download, Eye, ExternalLink, File, Grid, List, Trash2, Globe, Lock, Copy } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { apiEndpoints } from "../util/apiEndpoints.js";
@@ -8,7 +8,9 @@ import { useNavigate } from "react-router-dom";
 import Modal from "../components/Modal.jsx";
 import ConfirmationDialog from "../components/ConfirmationDialog.jsx";
 import LinkShareModal from "../components/LinkShareModal.jsx";
+import FilePreviewModal from "../components/FilePreviewModal.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useFilePreview } from "../hooks/useFilePreview.js";
 const MyFiles = () => {
   const [files, setFiles] = useState([]);
   const [viewMode, setViewMode] = useState("list");
@@ -16,6 +18,7 @@ const MyFiles = () => {
   const [fileToDelete, setFileToDelete] = useState(null);
   const { token } = useAuth();
   const navigate = useNavigate();
+  const preview = useFilePreview();
   const [shareModal,setShareModal] = useState({
     isOpen: false,
     fileId: null,
@@ -53,6 +56,14 @@ const MyFiles = () => {
       toast.error('Error toggling file status: ', error.message);
     }
   }
+
+  //Open the inline preview modal for images/PDFs
+  const handlePreview = (file) => {
+    if (!token) return;
+    preview.open(file, apiEndpoints.DOWNLOAD_FILE(file.id), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  };
 
   //Handle file download
   const handleDownload = async (file) => {
@@ -199,6 +210,11 @@ const MyFiles = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex justify-center gap-4">
                           <button
+                            onClick={() => handlePreview(file)}
+                            title="Preview" className="text-gray-500 hover:text-blue-600">
+                            <Eye size={18} />
+                          </button>
+                          <button
                             onClick={() => handleDownload(file)}
                             title="Download" className="text-gray-500 hover:text-blue-600">
                             <Download size={18} />
@@ -210,8 +226,8 @@ const MyFiles = () => {
                           </button>
                           {file.isPublic ? (
                             <a href={`/file/${file.id}`}
-                              title="View File" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-blue-600">
-                              <Eye size={18} />
+                              title="Open public page" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-blue-600">
+                              <ExternalLink size={18} />
                             </a>
                           ) : <span className="w-[18px]"></span>}
                         </div>
@@ -239,6 +255,7 @@ const MyFiles = () => {
                     {file.isPublic && (
                       <button onClick={() => setShareModal({ isOpen: true, link: `${window.location.origin}/file/${file.id}` })} title="Share" className="text-gray-500 hover:text-blue-600"><Copy size={16} /></button>
                     )}
+                    <button onClick={() => handlePreview(file)} title="Preview" className="text-gray-500 hover:text-blue-600"><Eye size={16} /></button>
                     <button onClick={() => handleDownload(file)} title="Download" className="text-gray-500 hover:text-blue-600"><Download size={16} /></button>
                     <button onClick={() => handleDelete(file)} title="Delete" className="text-gray-500 hover:text-red-600"><Trash2 size={16} /></button>
                   </div>
@@ -268,6 +285,18 @@ const MyFiles = () => {
         onClose={() => setShareModal({ isOpen: false, link: "" })}
         link={shareModal.link}
         title="Share File"
+      />
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        isOpen={preview.isOpen}
+        file={preview.file}
+        url={preview.url}
+        kind={preview.kind}
+        loading={preview.loading}
+        error={preview.error}
+        onClose={preview.close}
+        onDownload={() => preview.file && handleDownload(preview.file)}
       />
       </DashboardLayout>
     )
