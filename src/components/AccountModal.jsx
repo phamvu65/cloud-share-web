@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { apiEndpoints } from '../util/apiEndpoints.js';
+import googleIcon from '../assets/google.svg';
 
 const AccountModal = ({ isOpen, onClose }) => {
     const { user, updateProfile, setPassword: setUserPassword, deleteAccount } = useAuth();
@@ -301,7 +302,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                                     <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-start rounded-3xl border border-gray-100 bg-gray-50 px-5 py-4">
                                         <span className="text-sm font-medium text-gray-600">Connected accounts</span>
                                         <div className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-white px-4 py-3">
-                                            <img src="https://www.gstatic.com/devrel-devsite/prod/vb4473143545b8e8c7bd7b7a17b26a6acba87c59ec1dd4457fe0671dbd21e6f95/firebase/images/touchicon-180.png" alt="Google" className="h-5 w-5 rounded-full" />
+                                            <img src={googleIcon} alt="Google" className="h-5 w-5 rounded-full" />
                                             <div>
                                                 <p className="text-sm font-medium text-gray-900">Google</p>
                                                 <p className="text-xs text-gray-500">{user?.email}</p>

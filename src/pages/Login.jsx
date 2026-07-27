@@ -138,9 +138,6 @@ const Login = () => {
                         <img src={googleIcon} alt="Google" className="h-5 w-5" />
                         Continue with Google
                     </button>
-                    <p className="text-center text-xs text-gray-500">
-                        If Google popup is blocked, allow third-party sign-in in your browser settings and try again.
-                    </p>
 
                     <div className="flex items-center gap-3">
                         <span className="block h-px flex-1 bg-gray-200"></span>
