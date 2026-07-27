@@ -1,84 +1,30 @@
 import DashboardLayout from "../layout/DashboardLayout.jsx";
-import {useContext, useState} from "react";
+import {useContext} from "react";
 import {UserCreditsContext} from "../context/UserCreditsContext.jsx";
 import {AlertCircle} from "lucide-react";
-import axios from "axios";
-import {apiEndpoints} from "../util/apiEndpoints.js";
 import UploadBox from "../components/UploadBox.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useFileUpload } from "../hooks/useFileUpload.js";
+
+const MAX_FILES = 5;
 
 const Upload = () => {
-    const [files, setFiles] = useState([]);
-    const [uploading, setUploading] = useState(false);
-    const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState(""); //success or error
     const { token } = useAuth();
-    const {credits, setCredits} = useContext(UserCreditsContext);
-    const MAX_FILES = 5;
+    const { credits, fetchUserCredits } = useContext(UserCreditsContext);
 
-    const handleFileChange = (e) => {
-        const selectedFiles = Array.from(e.target.files);
-
-        if (files.length + selectedFiles.length > MAX_FILES) {
-            setMessage(`You can only upload a maximum of ${MAX_FILES} files at once`);
-            setMessageType("error");
-            return;
-        }
-
-        //add the new files into the existing files
-        setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
-        setMessage("");
-        setMessageType("");
-    }
-
-    const handleRemoveFile = (index) => {
-        setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-        setMessageType("");
-        setMessage("");
-    }
-
-    const handleUpload = async () => {
-        if (files.length === 0){
-            setMessageType("error");
-            setMessage("Please select atleast one file to upload.");
-            return;
-        }
-
-        if (files.length > MAX_FILES) {
-            setMessage(`You can only upload a maximum of ${MAX_FILES} files at once.`);
-            setMessageType("error");
-            return;
-        }
-
-        setUploading(true);
-        setMessage("Uploading files...");
-        setMessageType("info");
-
-        const formData = new FormData();
-        files.forEach((file) => formData.append("files", file));
-
-        try {
-            const response = await axios.post(apiEndpoints.UPLOAD_FILE, formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (response.data && response.data.remainingCredits !== undefined) {
-                setCredits(response.data.remainingCredits);
-            }
-
-            setMessage("Files uploaded successfully.");
-            setMessageType("success");
-            setFiles([]);
-        }catch(error) {
-            console.error('Error uploading files: ', error);
-            setMessage(error.response?.data?.message || "Error uploading files. Please try again.");
-            setMessageType("error");
-        }finally {
-            setUploading(false);
-        }
-    }
+    const {
+        files,
+        uploading,
+        message,
+        messageType,
+        handleFileChange,
+        handleRemoveFile,
+        handleUpload,
+    } = useFileUpload({
+        token,
+        maxFiles: MAX_FILES,
+        onUploadSuccess: fetchUserCredits,
+    });
 
     const isUploadDisabled = files.length === 0 || files.length > MAX_FILES || credits <= 0 || files.length > credits;
 
