@@ -16,5 +16,8 @@ export const apiEndpoints = {
     REVOKE_SESSION: (id) => `${BASE_URL}/users/sessions/${id}`,
     CREATE_ORDER: `${BASE_URL}/payments/create-order`,
     TRANSACTIONS: `${BASE_URL}/transactions`,
-    PUBLIC_FILE_VIEW: (fileId) => `${BASE_URL}/files/public/${fileId}`
+    PUBLIC_FILE_VIEW: (fileId) => `${BASE_URL}/files/public/${fileId}`,
+    COMPRESS_PDF: `${BASE_URL}/pdf/compress`,
+    GET_PDF_JOB: (id) => `${BASE_URL}/pdf/jobs/${id}`,
+    LIST_PDF_JOBS: `${BASE_URL}/pdf/jobs`,
 }
