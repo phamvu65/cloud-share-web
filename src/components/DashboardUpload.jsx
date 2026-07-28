@@ -1,8 +1,10 @@
 import { ArrowUpFromLine, X, FileIcon, Loader2 } from 'lucide-react';
 import { useRef } from 'react';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 const DashboardUpload = ({ files, onFileChange, onUpload, uploading, onRemoveFile, remainingUploads }) => {
     const fileInputRef = useRef(null);
+    const { t } = useTranslation();
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -17,8 +19,8 @@ const DashboardUpload = ({ files, onFileChange, onUpload, uploading, onRemoveFil
         if (droppedFiles.length > 0) {
             const mockEvent = {
                 target: {
-                    files: droppedFiles
-                }
+                    files: droppedFiles,
+                },
             };
             onFileChange(mockEvent);
         }
@@ -39,11 +41,9 @@ const DashboardUpload = ({ files, onFileChange, onUpload, uploading, onRemoveFil
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <ArrowUpFromLine className="text-purple-500" size={18} />
-                    <h2 className="text-base font-medium">Upload Files</h2>
+                    <h2 className="text-base font-medium">{t('uploadBox.title')}</h2>
                 </div>
-                <div className="text-xs text-gray-500">
-                    {remainingUploads} of 5 files remaining
-                </div>
+                <div className="text-xs text-gray-500">{t('uploadBox.filesRemaining', { count: remainingUploads, max: 5 })}</div>
             </div>
 
             <div
@@ -56,23 +56,15 @@ const DashboardUpload = ({ files, onFileChange, onUpload, uploading, onRemoveFil
                     <div className="p-2 rounded-full bg-purple-50 mb-3">
                         <ArrowUpFromLine size={20} className="text-purple-500" />
                     </div>
-                    <p className="text-gray-700 text-sm mb-1">Drag and drop files here</p>
-                    <p className="text-gray-500 text-xs">or click to browse</p>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        onChange={onFileChange}
-                        className="hidden"
-                        accept="*/*"
-                        max={5}
-                    />
+                    <p className="text-gray-700 text-sm mb-1">{t('uploadBox.dragDrop')}</p>
+                    <p className="text-gray-500 text-xs">{t('uploadBox.browseShort')}</p>
+                    <input ref={fileInputRef} type="file" multiple onChange={onFileChange} className="hidden" accept="*/*" max={5} />
                 </div>
             </div>
 
             {files.length > 0 && (
                 <div className="mt-4">
-                    <h3 className="text-xs font-medium mb-2">Selected Files ({files.length})</h3>
+                    <h3 className="text-xs font-medium mb-2">{t('uploadBox.selectedFiles', { count: files.length })}</h3>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                         {files.map((file, index) => (
                             <div key={index} className="flex items-center justify-between p-2 border-b last:border-b-0 hover:bg-gray-50">
@@ -109,10 +101,10 @@ const DashboardUpload = ({ files, onFileChange, onUpload, uploading, onRemoveFil
                         {uploading ? (
                             <>
                                 <Loader2 size={16} className="animate-spin" />
-                                <span>Uploading...</span>
+                                <span>{t('uploadBox.uploadingButton')}</span>
                             </>
                         ) : (
-                            <span>Upload {files.length} File(s)</span>
+                            <span>{t('uploadBox.uploadNButton', { count: files.length })}</span>
                         )}
                     </button>
                 </div>

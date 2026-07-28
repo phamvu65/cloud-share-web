@@ -1,140 +1,155 @@
-import DashboardLayout from "../layout/DashboardLayout.jsx";
-import {useContext, useEffect, useState} from "react";
-import {useAuth, useUser} from "@clerk/clerk-react";
-import {UserCreditsContext} from "../context/UserCreditsContext.jsx";
-import axios from "axios";
-import {apiEndpoints} from "../util/apiEndpoints.js";
-import {AlertCircle, Check, CreditCard, Loader2} from "lucide-react";
-import {useSearchParams} from "react-router-dom";
+import DashboardLayout from '../layout/DashboardLayout.jsx';
+import { useContext, useEffect, useState } from 'react';
+import { UserCreditsContext } from '../context/UserCreditsContext.jsx';
+import axios from 'axios';
+import { apiEndpoints } from '../util/apiEndpoints.js';
+import { AlertCircle, Check, CreditCard, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 const Subscription = () => {
     const [processingPayment, setProcessingPayment] = useState(false);
-    const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState("");
+    const [message, setMessage] = useState('');
+    const [messageType, setMessageType] = useState('');
     const [searchParams] = useSearchParams(); // Không cần lấy setSearchParams nữa
 
-    const {getToken} = useAuth();
-    const {isLoaded} = useUser();
-    const {credits, setCredits} = useContext(UserCreditsContext);
+    const { token, isLoading: isAuthLoading } = useAuth();
+    const { credits, setCredits } = useContext(UserCreditsContext);
+    const { t } = useTranslation();
 
     const plans = [
         {
-            id: "premium",
-            name: "Premium",
+            id: 'premium',
+            name: t('subscription.premiumName'),
             credits: 500,
             price: 25,
-            features: ["Upload up to 500 files", "Access to all basic features", "Priority support"],
-            recommended: false
+            features: [t('subscription.premiumFeature1'), t('subscription.premiumFeature2'), t('subscription.premiumFeature3')],
+            recommended: false,
         },
         {
-            id: "ultimate",
-            name: "Ultimate",
+            id: 'ultimate',
+            name: t('subscription.ultimateName'),
             credits: 5000,
             price: 50,
-            features: ["Upload up to 5000 files", "Access to all premium features", "Priority support", "Advanced analytics"],
-            recommended: true
-        }
+            features: [
+                t('subscription.ultimateFeature1'),
+                t('subscription.ultimateFeature2'),
+                t('subscription.ultimateFeature3'),
+                t('subscription.ultimateFeature4'),
+            ],
+            recommended: true,
+        },
     ];
-
-    if (!isLoaded) {
-        return <DashboardLayout activeMenu="Subscription"><div className="p-6">Loading...</div></DashboardLayout>;
-    }
 
     // Fetch credits on mount
     useEffect(() => {
         const loadCredits = async () => {
+            if (!token) return;
             try {
-                const token = await getToken();
                 const response = await axios.get(apiEndpoints.GET_CREDITS, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 setCredits(response.data.credits);
             } catch (error) {
-                console.error("Error fetching credits:", error);
+                console.error('Error fetching credits:', error);
             }
         };
         loadCredits();
-    }, [getToken, setCredits]);
+    }, [token, setCredits]);
 
     // Xử lý payment return - chỉ chạy 1 lần
     useEffect(() => {
-        const status = searchParams.get("status");
-        
+        const status = searchParams.get('status');
+
         // Kiểm tra sessionStorage để tránh re-process
-        if (status && !sessionStorage.getItem("payment_processed")) {
-            sessionStorage.setItem("payment_processed", "true");
+        if (status && !sessionStorage.getItem('payment_processed')) {
+            sessionStorage.setItem('payment_processed', 'true');
 
             (async () => {
+                if (!token) return;
                 try {
-                    const token = await getToken();
+                    if (status === 'success') {
+                        setMessage(t('subscription.paymentSuccess'));
+                        setMessageType('success');
 
-                    if (status === "success") {
-                        setMessage("Payment successful! Your credits have been added.");
-                        setMessageType("success");
-                        
                         const response = await axios.get(apiEndpoints.GET_CREDITS, {
-                            headers: { 'Authorization': `Bearer ${token}` }
+                            headers: { Authorization: `Bearer ${token}` },
                         });
                         setCredits(response.data.credits);
-                    } else if (status === "cancel") {
-                        setMessage("Payment was cancelled.");
-                        setMessageType("error");
+                    } else if (status === 'cancel') {
+                        setMessage(t('subscription.paymentCancelled'));
+                        setMessageType('error');
                     }
                     setTimeout(() => {
                         const currentUrl = new URL(window.location.href);
-                        currentUrl.searchParams.delete("status");
+                        currentUrl.searchParams.delete('status');
                         window.history.replaceState({}, document.title, currentUrl.toString());
                     }, 2000);
-
                 } catch (error) {
-                    console.error("Error processing payment:", error);
+                    console.error('Error processing payment:', error);
                 }
             })();
         }
-    }, [searchParams, getToken, setCredits]);
+    }, [searchParams, token, setCredits, t]);
 
     const handlePurchase = async (plan) => {
         setProcessingPayment(true);
         setMessage('');
 
         try {
-            const token = await getToken();
-            const response = await axios.post(apiEndpoints.CREATE_ORDER, {
-                planId: plan.id,
-                amount: plan.price,
-                credits: plan.credits,
-                currency: "usd",
-            }, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await axios.post(
+                apiEndpoints.CREATE_ORDER,
+                {
+                    planId: plan.id,
+                    amount: plan.price,
+                    credits: plan.credits,
+                    currency: 'usd',
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
 
             if (response.data.success) {
                 window.location.href = response.data.checkoutUrl;
             } else {
-                setMessage(response.data.message || "Failed to create payment.");
-                setMessageType("error");
+                setMessage(response.data.message || t('subscription.createOrderError'));
+                setMessageType('error');
             }
         } catch (error) {
-            console.error("Payment initiation error:", error);
-            setMessage("Failed to initiate payment. Please try again later.");
-            setMessageType("error");
+            console.error('Payment initiation error:', error);
+            setMessage(t('subscription.createOrderFailed'));
+            setMessageType('error');
         } finally {
             setProcessingPayment(false);
         }
     };
 
+    if (isAuthLoading) {
+        return (
+            <DashboardLayout activeMenu="subscription">
+                <div className="p-6">{t('common.loading')}</div>
+            </DashboardLayout>
+        );
+    }
+
     return (
-        <DashboardLayout activeMenu="Subscription">
+        <DashboardLayout activeMenu="subscription">
             <div className="p-6">
-                <h1 className="text-2xl font-bold mb-2">Subscription Plans</h1>
-                <p className="text-gray-600 mb-6">Choose a plan that works for you</p>
+                <h1 className="text-2xl font-bold mb-2">{t('subscription.title')}</h1>
+                <p className="text-gray-600 mb-6">{t('subscription.subtitle')}</p>
 
                 {message && (
-                    <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
-                        messageType === 'error' ? 'bg-red-50 text-red-700' :
-                            messageType === 'success' ? 'bg-green-50 text-green-700' :
-                                'bg-blue-50 text-blue-700'
-                    }`}>
+                    <div
+                        className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+                            messageType === 'error'
+                                ? 'bg-red-50 text-red-700'
+                                : messageType === 'success'
+                                  ? 'bg-green-50 text-green-700'
+                                  : 'bg-blue-50 text-blue-700'
+                        }`}
+                    >
                         {messageType === 'error' && <AlertCircle size={20} />}
                         {messageType === 'success' && <Check size={20} />}
                         {message}
@@ -145,20 +160,29 @@ const Subscription = () => {
                     <div className="bg-blue-50 p-6 rounded-lg">
                         <div className="flex items-center gap-2 mb-4">
                             <CreditCard className="text-purple-500" />
-                            <h2 className="text-lg font-medium">Current Credits: <span className="font-bold text-purple-500">{credits}</span></h2>
+                            <h2 className="text-lg font-medium">
+                                {t('subscription.currentCredits')} <span className="font-bold text-purple-500">{credits}</span>
+                            </h2>
                         </div>
-                        <p className="text-sm text-gray-600 mt-2">You can upload {credits} more files with your current credits.</p>
+                        <p className="text-sm text-gray-600 mt-2">{t('subscription.uploadsRemaining', { count: credits })}</p>
                     </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                     {plans.map((plan) => (
-                        <div key={plan.id} className={`border rounded-xl p-6 ${plan.recommended ? 'border-purple-200 bg-purple-50 shadow-md' : 'border-gray-200 bg-white'}`}>
-                            {plan.recommended && <div className="inline-block bg-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4">RECOMMENDED</div>}
+                        <div
+                            key={plan.id}
+                            className={`border rounded-xl p-6 ${plan.recommended ? 'border-purple-200 bg-purple-50 shadow-md' : 'border-gray-200 bg-white'}`}
+                        >
+                            {plan.recommended && (
+                                <div className="inline-block bg-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4">
+                                    {t('subscription.recommended')}
+                                </div>
+                            )}
                             <h3 className="text-xl font-bold">{plan.name}</h3>
                             <div className="mt-2 mb-4">
                                 <span className="text-3xl font-bold">${plan.price}</span>
-                                <span className="text-gray-500"> for {plan.credits} credits</span>
+                                <span className="text-gray-500"> {t('subscription.forCredits', { count: plan.credits })}</span>
                             </div>
                             <ul className="space-y-3 mb-6">
                                 {plan.features.map((feature, index) => (
@@ -168,16 +192,27 @@ const Subscription = () => {
                                     </li>
                                 ))}
                             </ul>
-                            <button onClick={() => handlePurchase(plan)} disabled={processingPayment} className={`w-full py-2 rounded-md font-medium transition-colors ${plan.recommended ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-white border border-purple-500 text-purple-500 hover:bg-purple-50'} disabled:opacity-50 flex items-center justify-center gap-2`}>
-                                {processingPayment ? (<><Loader2 size={16} className="animate-spin" /><span>Processing...</span></>) : (<span>Purchase Plan</span>)}
+                            <button
+                                onClick={() => handlePurchase(plan)}
+                                disabled={processingPayment}
+                                className={`w-full py-2 rounded-md font-medium transition-colors ${plan.recommended ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-white border border-purple-500 text-purple-500 hover:bg-purple-50'} disabled:opacity-50 flex items-center justify-center gap-2`}
+                            >
+                                {processingPayment ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        <span>{t('subscription.processing')}</span>
+                                    </>
+                                ) : (
+                                    <span>{t('subscription.purchasePlan')}</span>
+                                )}
                             </button>
                         </div>
                     ))}
                 </div>
 
                 <div className="mt-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <h3 className="font-medium mb-2">How credits work</h3>
-                    <p className="text-sm text-gray-600">Each file upload consumes 1 credit. New users start with 5 free credits. Credits never expire and can be used at any time. If you run out of credits, you can purchase more through one of our plans above.</p>
+                    <h3 className="font-medium mb-2">{t('subscription.howCreditsWorkTitle')}</h3>
+                    <p className="text-sm text-gray-600">{t('subscription.howCreditsWork')}</p>
                 </div>
             </div>
         </DashboardLayout>

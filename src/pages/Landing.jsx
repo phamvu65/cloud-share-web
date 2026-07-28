@@ -1,47 +1,66 @@
-import HeroSection from "../components/landing/HeroSection";
-import FeaturesSection from "../components/landing/FeaturesSection";
-import PricingSection from "../components/landing/PricingSection";
-import TestimonialsSection from "../components/landing/TestimonialsSection";
-import CTASection from "../components/landing/CTASection";
-import Footer from "../components/landing/Footer";
+import HeroSection from '../components/landing/HeroSection';
+import FeaturesSection from '../components/landing/FeaturesSection';
+import PricingSection from '../components/landing/PricingSection';
+import TestimonialsSection from '../components/landing/TestimonialsSection';
+import CTASection from '../components/landing/CTASection';
+import Footer from '../components/landing/Footer';
 
-import { features, pricingPlans, testimonials } from "../assets/data.js";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { features, pricingPlans, testimonials } from '../assets/data.js';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
+import AuthModal from '../components/AuthModal.jsx';
+import LanguageToggle from '../components/LanguageToggle.jsx';
 
 const Landing = () => {
-  const { openSignIn, openSignUp } = useClerk();
-  const { isSignedIn } = useUser();
-  const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (isSignedIn) {
-            navigate("/dashboard");
+        if (isAuthenticated) {
+            navigate('/dashboard');
         }
-    }, [isSignedIn, navigate]);
+    }, [isAuthenticated, navigate]);
 
-  return (
-    <div className="landing-page bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Hero Section */}
-      <HeroSection openSignIn={openSignIn} openSignUp={openSignUp} />
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState('signin');
 
-      {/* Features Section */}
-      <FeaturesSection features={features} />
+    const openSignIn = () => {
+        setAuthMode('signin');
+        setIsAuthModalOpen(true);
+    };
+    const openSignUp = () => {
+        setAuthMode('signup');
+        setIsAuthModalOpen(true);
+    };
 
-      {/* Pricing Section */}
-      <PricingSection pricingPlans={pricingPlans} openSignUp={openSignUp} />
+    return (
+        <div className="landing-page bg-gradient-to-b from-gray-50 to-gray-100">
+            <div className="fixed right-4 top-4 z-50">
+                <LanguageToggle className="rounded-full bg-white/90 px-3 py-2 shadow-md backdrop-blur" />
+            </div>
 
-      {/* Testimonials Section */}
-      <TestimonialsSection testimonials={testimonials} />
+            {/* Hero Section */}
+            <HeroSection openSignIn={openSignIn} openSignUp={openSignUp} />
 
-      {/* CTA Section */}
-      <CTASection openSignUp={openSignUp} />
+            {/* Features Section */}
+            <FeaturesSection features={features} />
 
-      {/* Footer Section*/}
-      <Footer  />
-    </div>
-  )
-}
+            {/* Pricing Section */}
+            <PricingSection pricingPlans={pricingPlans} openSignUp={openSignUp} />
+
+            {/* Testimonials Section */}
+            <TestimonialsSection testimonials={testimonials} />
+
+            {/* CTA Section */}
+            <CTASection openSignUp={openSignUp} />
+
+            {/* Footer Section*/}
+            <Footer />
+
+            <AuthModal isOpen={isAuthModalOpen} initialMode={authMode} onClose={() => setIsAuthModalOpen(false)} />
+        </div>
+    );
+};
 
 export default Landing;

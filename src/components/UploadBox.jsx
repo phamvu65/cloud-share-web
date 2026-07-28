@@ -1,8 +1,10 @@
 import { ArrowUpFromLine, X, FileIcon, Loader2 } from 'lucide-react';
 import { useRef } from 'react';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, remainingCredits, isUploadDisabled }) => {
     const fileInputRef = useRef(null);
+    const { t } = useTranslation();
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -18,8 +20,8 @@ const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, rem
             // Create a new event-like object with the files
             const mockEvent = {
                 target: {
-                    files: droppedFiles
-                }
+                    files: droppedFiles,
+                },
             };
             onFileChange(mockEvent);
         }
@@ -40,11 +42,9 @@ const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, rem
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <ArrowUpFromLine className="text-blue-600" size={20} />
-                    <h2 className="text-lg font-medium">Upload Files</h2>
+                    <h2 className="text-lg font-medium">{t('uploadBox.title')}</h2>
                 </div>
-                <div className="text-sm text-gray-500">
-                    {remainingCredits} credits remaining
-                </div>
+                <div className="text-sm text-gray-500">{t('uploadBox.creditsRemaining', { count: remainingCredits })}</div>
             </div>
 
             <div
@@ -57,23 +57,15 @@ const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, rem
                     <div className="p-3 rounded-full bg-blue-50 mb-4">
                         <ArrowUpFromLine size={24} className="text-blue-600" />
                     </div>
-                    <p className="text-gray-700 mb-1">Drag and drop files here</p>
-                    <p className="text-gray-500 text-sm mb-2">or click to browse ({remainingCredits} credits remaining)</p>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        onChange={onFileChange}
-                        className="hidden"
-                        accept="*/*"
-                        max={5}
-                    />
+                    <p className="text-gray-700 mb-1">{t('uploadBox.dragDrop')}</p>
+                    <p className="text-gray-500 text-sm mb-2">{t('uploadBox.browse', { count: remainingCredits })}</p>
+                    <input ref={fileInputRef} type="file" multiple onChange={onFileChange} className="hidden" accept="*/*" max={5} />
                 </div>
             </div>
 
             {files.length > 0 && (
                 <div className="mt-6">
-                    <h3 className="text-sm font-medium mb-2">Selected Files ({files.length})</h3>
+                    <h3 className="text-sm font-medium mb-2">{t('uploadBox.selectedFiles', { count: files.length })}</h3>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                         {files.map((file, index) => (
                             <div key={index} className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-gray-50">
@@ -110,10 +102,10 @@ const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, rem
                         {uploading ? (
                             <>
                                 <Loader2 size={18} className="animate-spin" />
-                                <span>Uploading...</span>
+                                <span>{t('uploadBox.uploadingButton')}</span>
                             </>
                         ) : (
-                            <span>Upload</span>
+                            <span>{t('uploadBox.uploadButton')}</span>
                         )}
                     </button>
                 </div>
