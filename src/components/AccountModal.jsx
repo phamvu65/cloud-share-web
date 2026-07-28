@@ -3,11 +3,13 @@ import axios from 'axios';
 import { createPortal } from 'react-dom';
 import { Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import { apiEndpoints } from '../util/apiEndpoints.js';
 import googleIcon from '../assets/google.svg';
 
 const AccountModal = ({ isOpen, onClose }) => {
     const { user, updateProfile, setPassword: setUserPassword, deleteAccount } = useAuth();
+    const { t } = useTranslation();
     const modalRef = useRef(null);
     const [activeSection, setActiveSection] = useState('profile');
     const [firstName, setFirstName] = useState(user?.firstName || '');
@@ -110,9 +112,9 @@ const AccountModal = ({ isOpen, onClose }) => {
 
         try {
             await updateProfile({ firstName, lastName, username, photoUrl });
-            setSuccessMessage('Account updated successfully.');
+            setSuccessMessage(t('account.updateSuccess'));
         } catch (error) {
-            setErrorMessage('Could not update your profile. Please try again.');
+            setErrorMessage(t('account.updateError'));
             console.error(error);
         } finally {
             setLoading(false);
@@ -124,12 +126,12 @@ const AccountModal = ({ isOpen, onClose }) => {
         setErrorMessage('');
 
         if (!passwordInput || passwordInput.length < 6) {
-            setErrorMessage('Password must be at least 6 characters.');
+            setErrorMessage(t('account.passwordTooShort'));
             return;
         }
 
         if (passwordInput !== confirmPasswordInput) {
-            setErrorMessage('Passwords do not match.');
+            setErrorMessage(t('account.passwordMismatch'));
             return;
         }
 
@@ -137,11 +139,11 @@ const AccountModal = ({ isOpen, onClose }) => {
 
         try {
             await setUserPassword(passwordInput);
-            setSuccessMessage('Password updated successfully.');
+            setSuccessMessage(t('account.passwordUpdateSuccess'));
             setPasswordInput('');
             setConfirmPasswordInput('');
         } catch (error) {
-            setErrorMessage(error.response?.data?.message || 'Could not update your password.');
+            setErrorMessage(error.response?.data?.message || t('account.passwordUpdateError'));
             console.error(error);
         } finally {
             setSecurityLoading(false);
@@ -149,7 +151,7 @@ const AccountModal = ({ isOpen, onClose }) => {
     };
 
     const handleDeleteAccount = async () => {
-        const confirmed = window.confirm('This will permanently delete your account. Continue?');
+        const confirmed = window.confirm(t('account.deleteConfirm'));
         if (!confirmed) return;
 
         setSuccessMessage('');
@@ -160,7 +162,7 @@ const AccountModal = ({ isOpen, onClose }) => {
             await deleteAccount();
             onClose();
         } catch (error) {
-            setErrorMessage('Could not delete your account. Please try again.');
+            setErrorMessage(t('account.deleteAccountError'));
             console.error(error);
         } finally {
             setSecurityLoading(false);
@@ -187,9 +189,9 @@ const AccountModal = ({ isOpen, onClose }) => {
             <div ref={modalRef} className="w-full max-w-4xl overflow-hidden rounded-[28px] bg-white shadow-2xl">
                 <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5">
                     <div>
-                        <p className="text-sm uppercase tracking-[0.24em] text-purple-600">Account</p>
-                        <h2 className="text-2xl font-semibold text-gray-900">Profile details</h2>
-                        <p className="mt-1 text-sm text-gray-500">Manage your account info.</p>
+                        <p className="text-sm uppercase tracking-[0.24em] text-purple-600">{t('account.title')}</p>
+                        <h2 className="text-2xl font-semibold text-gray-900">{t('account.subtitle')}</h2>
+                        <p className="mt-1 text-sm text-gray-500">{t('account.description')}</p>
                     </div>
                     <button
                         type="button"
@@ -204,33 +206,54 @@ const AccountModal = ({ isOpen, onClose }) => {
                     <aside className="rounded-3xl border border-gray-200 bg-gray-50 p-5">
                         <div className="space-y-4">
                             <button
-                            type="button"
-                            onClick={() => setActiveSection('profile')}
-                            className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition ${
-                                activeSection === 'profile'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-600 hover:bg-white hover:text-gray-900'
-                            }`}
-                        >
-                            <span className="h-9 w-9 rounded-full bg-purple-100 text-purple-600 grid place-items-center">
-                                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            </span>
-                            Profile
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveSection('security')}
-                            className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition ${
-                                activeSection === 'security'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-600 hover:bg-white hover:text-gray-900'
-                            }`}
-                        >
-                            <span className="h-9 w-9 rounded-full bg-purple-100 text-purple-600 grid place-items-center">
-                                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1v22M1 12h22"/></svg>
-                            </span>
-                            Security
-                        </button>
+                                type="button"
+                                onClick={() => setActiveSection('profile')}
+                                className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition ${
+                                    activeSection === 'profile'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                                }`}
+                            >
+                                <span className="h-9 w-9 rounded-full bg-purple-100 text-purple-600 grid place-items-center">
+                                    <svg
+                                        className="h-5 w-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                </span>
+                                {t('account.profile')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveSection('security')}
+                                className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition ${
+                                    activeSection === 'security'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                                }`}
+                            >
+                                <span className="h-9 w-9 rounded-full bg-purple-100 text-purple-600 grid place-items-center">
+                                    <svg
+                                        className="h-5 w-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M12 1v22M1 12h22" />
+                                    </svg>
+                                </span>
+                                {t('account.security')}
+                            </button>
                         </div>
                     </aside>
 
@@ -239,17 +262,23 @@ const AccountModal = ({ isOpen, onClose }) => {
                             <>
                                 <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-center sm:gap-6">
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-500">Avatar</p>
-                                        <p className="mt-1 text-sm text-gray-500">Update your profile picture</p>
+                                        <p className="text-sm font-semibold text-gray-500">{t('account.avatar')}</p>
+                                        <p className="mt-1 text-sm text-gray-500">{t('account.avatarHint')}</p>
                                     </div>
                                     <div className="flex justify-center sm:justify-end">
                                         <label htmlFor="avatar-upload" className="relative cursor-pointer">
                                             <div className="h-16 w-16 overflow-hidden rounded-full bg-purple-100 text-purple-600 shadow-sm">
                                                 {avatarPreview ? (
-                                                    <img src={avatarPreview} alt={user?.displayName || 'Avatar'} className="h-full w-full object-cover" />
+                                                    <img
+                                                        src={avatarPreview}
+                                                        alt={user?.displayName || 'Avatar'}
+                                                        className="h-full w-full object-cover"
+                                                    />
                                                 ) : (
                                                     <div className="flex h-full w-full items-center justify-center text-xl font-semibold">
-                                                        {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+                                                        {user?.displayName?.charAt(0).toUpperCase() ||
+                                                            user?.email?.charAt(0).toUpperCase() ||
+                                                            'U'}
                                                     </div>
                                                 )}
                                             </div>
@@ -266,7 +295,9 @@ const AccountModal = ({ isOpen, onClose }) => {
 
                                 <div className="mt-6 space-y-5">
                                     <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center rounded-3xl border border-gray-100 bg-gray-50 px-4 py-3">
-                                        <label htmlFor="first-name" className="text-base font-semibold text-gray-700">First name</label>
+                                        <label htmlFor="first-name" className="text-base font-semibold text-gray-700">
+                                            {t('auth.firstName')}
+                                        </label>
                                         <input
                                             id="first-name"
                                             type="text"
@@ -276,7 +307,9 @@ const AccountModal = ({ isOpen, onClose }) => {
                                         />
                                     </div>
                                     <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center rounded-3xl border border-gray-100 bg-gray-50 px-4 py-3">
-                                        <label htmlFor="last-name" className="text-base font-semibold text-gray-700">Last name</label>
+                                        <label htmlFor="last-name" className="text-base font-semibold text-gray-700">
+                                            {t('auth.lastName')}
+                                        </label>
                                         <input
                                             id="last-name"
                                             type="text"
@@ -286,7 +319,9 @@ const AccountModal = ({ isOpen, onClose }) => {
                                         />
                                     </div>
                                     <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center rounded-3xl border border-gray-100 bg-gray-50 px-4 py-3">
-                                        <label htmlFor="username" className="text-base font-semibold text-gray-700">Username</label>
+                                        <label htmlFor="username" className="text-base font-semibold text-gray-700">
+                                            {t('auth.username')}
+                                        </label>
                                         <input
                                             id="username"
                                             type="text"
@@ -296,11 +331,11 @@ const AccountModal = ({ isOpen, onClose }) => {
                                         />
                                     </div>
                                     <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center rounded-3xl border border-gray-100 bg-gray-50 px-4 py-3">
-                                        <span className="text-base font-semibold text-gray-700">Email address</span>
-                                        <p className="text-sm text-gray-900">{user?.email || 'No email'}</p>
+                                        <span className="text-base font-semibold text-gray-700">{t('account.emailAddress')}</span>
+                                        <p className="text-sm text-gray-900">{user?.email || t('account.noEmail')}</p>
                                     </div>
                                     <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-start rounded-3xl border border-gray-100 bg-gray-50 px-5 py-4">
-                                        <span className="text-sm font-medium text-gray-600">Connected accounts</span>
+                                        <span className="text-sm font-medium text-gray-600">{t('account.connectedAccounts')}</span>
                                         <div className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-white px-4 py-3">
                                             <img src={googleIcon} alt="Google" className="h-5 w-5 rounded-full" />
                                             <div>
@@ -317,8 +352,8 @@ const AccountModal = ({ isOpen, onClose }) => {
                                     <div className="flex flex-col gap-4">
                                         <div className="flex items-center justify-between gap-4">
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900">Password</p>
-                                                <p className="mt-1 text-sm text-gray-500">Set a password for your account.</p>
+                                                <p className="text-sm font-semibold text-gray-900">{t('account.passwordTitle')}</p>
+                                                <p className="mt-1 text-sm text-gray-500">{t('account.passwordHint')}</p>
                                             </div>
                                             <button
                                                 type="button"
@@ -326,7 +361,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                                                 disabled={securityLoading}
                                                 className="rounded-3xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:opacity-50"
                                             >
-                                                {securityLoading ? 'Saving…' : 'Set password'}
+                                                {securityLoading ? t('account.saving') : t('account.setPassword')}
                                             </button>
                                         </div>
                                         <div className="grid gap-3 sm:grid-cols-2">
@@ -335,7 +370,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                                                     type={showPassword ? 'text' : 'password'}
                                                     value={passwordInput}
                                                     onChange={(e) => setPasswordInput(e.target.value)}
-                                                    placeholder="New password"
+                                                    placeholder={t('account.newPassword')}
                                                     className="w-full rounded-3xl border border-gray-200 bg-white px-3 py-2.5 pr-11 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
                                                 />
                                                 <button
@@ -351,7 +386,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                                                     type={showConfirmPassword ? 'text' : 'password'}
                                                     value={confirmPasswordInput}
                                                     onChange={(e) => setConfirmPasswordInput(e.target.value)}
-                                                    placeholder="Confirm password"
+                                                    placeholder={t('account.confirmPassword')}
                                                     className="w-full rounded-3xl border border-gray-200 bg-white px-3 py-2.5 pr-11 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
                                                 />
                                                 <button
@@ -368,14 +403,14 @@ const AccountModal = ({ isOpen, onClose }) => {
                                 <div className="rounded-3xl border border-gray-100 bg-gray-50 p-5">
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
-                                            <p className="text-sm font-semibold text-gray-900">Active devices</p>
-                                            <p className="mt-1 text-sm text-gray-500">Manage your signed-in sessions.</p>
+                                            <p className="text-sm font-semibold text-gray-900">{t('account.activeDevices')}</p>
+                                            <p className="mt-1 text-sm text-gray-500">{t('account.activeDevicesHint')}</p>
                                         </div>
                                     </div>
                                     {sessionsLoading ? (
-                                        <p className="mt-4 text-sm text-gray-500">Loading sessions…</p>
+                                        <p className="mt-4 text-sm text-gray-500">{t('account.loadingSessions')}</p>
                                     ) : sessions.length === 0 ? (
-                                        <p className="mt-4 text-sm text-gray-500">No active sessions found.</p>
+                                        <p className="mt-4 text-sm text-gray-500">{t('account.noSessions')}</p>
                                     ) : (
                                         <div className="mt-4 space-y-3">
                                             {sessions.map((session) => (
@@ -383,19 +418,21 @@ const AccountModal = ({ isOpen, onClose }) => {
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div>
                                                             <p className="text-sm font-semibold text-gray-900">
-                                                                {session.browser || 'Unknown browser'}
+                                                                {session.browser || t('account.unknownBrowser')}
                                                             </p>
                                                             <p className="text-xs text-gray-500">
-                                                                {session.os || 'Unknown OS'} • {session.ipAddress || 'Unknown IP'}
+                                                                {session.os || t('account.unknownOs')} •{' '}
+                                                                {session.ipAddress || t('account.unknownIp')}
                                                             </p>
                                                             <p className="mt-1 text-xs text-gray-400">
-                                                                Last used: {session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleString() : '—'}
+                                                                {t('account.lastUsed')}:{' '}
+                                                                {session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleString() : '—'}
                                                             </p>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             {session.current && (
                                                                 <span className="rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700">
-                                                                    Current
+                                                                    {t('account.current')}
                                                                 </span>
                                                             )}
                                                             {!session.current && (
@@ -404,7 +441,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                                                                     onClick={() => handleRevokeSession(session.id)}
                                                                     className="rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-700 transition hover:bg-gray-100"
                                                                 >
-                                                                    Revoke
+                                                                    {t('account.revoke')}
                                                                 </button>
                                                             )}
                                                         </div>
@@ -417,8 +454,8 @@ const AccountModal = ({ isOpen, onClose }) => {
                                 <div className="rounded-3xl border border-gray-100 bg-gray-50 p-5">
                                     <div className="flex items-center justify-between gap-4">
                                         <div>
-                                            <p className="text-sm font-semibold text-gray-900">Delete account</p>
-                                            <p className="mt-1 text-sm text-gray-500">Permanently remove your account.</p>
+                                            <p className="text-sm font-semibold text-gray-900">{t('account.deleteAccount')}</p>
+                                            <p className="mt-1 text-sm text-gray-500">{t('account.deleteAccountHint')}</p>
                                         </div>
                                         <button
                                             type="button"
@@ -426,7 +463,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                                             disabled={securityLoading}
                                             className="rounded-3xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
                                         >
-                                            {securityLoading ? 'Deleting…' : 'Delete account'}
+                                            {securityLoading ? t('account.deleting') : t('account.deleteAccount')}
                                         </button>
                                     </div>
                                 </div>
@@ -443,7 +480,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                                     disabled={loading}
                                     className="w-full rounded-3xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 disabled:opacity-50"
                                 >
-                                    {loading ? 'Updating…' : 'Update account'}
+                                    {loading ? t('account.updating') : t('account.updateAccount')}
                                 </button>
                             </div>
                         ) : (
@@ -456,7 +493,7 @@ const AccountModal = ({ isOpen, onClose }) => {
                 </div>
             </div>
         </div>,
-        document.body
+        document.body,
     );
 };
 

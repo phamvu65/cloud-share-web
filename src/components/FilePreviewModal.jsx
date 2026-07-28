@@ -1,14 +1,13 @@
 import { createPortal } from 'react-dom';
 import { Download, FileWarning, Loader2, Music, X } from 'lucide-react';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 const FilePreviewModal = ({ isOpen, file, url, kind, loading, error, onClose, onDownload }) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
 
     return createPortal(
-        <div
-            className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 py-8"
-            onClick={onClose}
-        >
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 py-8" onClick={onClose}>
             <div
                 className="flex h-full max-h-[95vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
@@ -22,7 +21,7 @@ const FilePreviewModal = ({ isOpen, file, url, kind, loading, error, onClose, on
                             <button
                                 type="button"
                                 onClick={onDownload}
-                                title="Download"
+                                title={t('common.download')}
                                 className="rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
                             >
                                 <Download size={18} />
@@ -31,7 +30,7 @@ const FilePreviewModal = ({ isOpen, file, url, kind, loading, error, onClose, on
                         <button
                             type="button"
                             onClick={onClose}
-                            title="Close"
+                            title={t('common.close')}
                             className="rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
                         >
                             <X size={18} />
@@ -43,7 +42,7 @@ const FilePreviewModal = ({ isOpen, file, url, kind, loading, error, onClose, on
                     {loading ? (
                         <div className="flex flex-col items-center gap-3 text-gray-500">
                             <Loader2 size={32} className="animate-spin" />
-                            <span className="text-sm">Loading preview...</span>
+                            <span className="text-sm">{t('filePreview.loading')}</span>
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center gap-3 p-8 text-center text-gray-500">
@@ -61,19 +60,21 @@ const FilePreviewModal = ({ isOpen, file, url, kind, loading, error, onClose, on
                             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-purple-100 text-purple-600">
                                 <Music size={32} />
                             </div>
-                            <p className="max-w-full truncate text-sm font-medium text-gray-700" title={file?.name}>{file?.name}</p>
+                            <p className="max-w-full truncate text-sm font-medium text-gray-700" title={file?.name}>
+                                {file?.name}
+                            </p>
                             <audio src={url} controls className="w-full" />
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-3 p-8 text-center text-gray-500">
                             <FileWarning size={32} />
-                            <span className="text-sm">Preview isn&apos;t available for this file type. Download it to view.</span>
+                            <span className="text-sm">{t('filePreview.unsupported')}</span>
                         </div>
                     )}
                 </div>
             </div>
         </div>,
-        document.body
+        document.body,
     );
 };
 

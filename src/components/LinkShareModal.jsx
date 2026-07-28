@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import Modal from './Modal';
 import { Check, Copy } from 'lucide-react';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 /**
  * A modal component for sharing links
@@ -11,14 +12,10 @@ import { Check, Copy } from 'lucide-react';
  * @param {string} props.link - The link to share
  * @param {string} props.title - Modal title
  */
-const LinkShareModal = ({
-                            isOpen,
-                            onClose,
-                            link,
-                            title = "Share Link"
-                        }) => {
+const LinkShareModal = ({ isOpen, onClose, link, title }) => {
     const [copied, setCopied] = React.useState(false);
     const linkInputRef = useRef(null);
+    const { t } = useTranslation();
 
     // Reset copied state when modal is opened or closed
     useEffect(() => {
@@ -36,13 +33,16 @@ const LinkShareModal = ({
     const handleCopyLink = () => {
         if (linkInputRef.current) {
             linkInputRef.current.select();
-            navigator.clipboard.writeText(link).then(() => {
-                setCopied(true);
-                // Reset copied state after 2 seconds
-                setTimeout(() => setCopied(false), 2000);
-            }).catch(err => {
-                console.error('Failed to copy link: ', err);
-            });
+            navigator.clipboard
+                .writeText(link)
+                .then(() => {
+                    setCopied(true);
+                    // Reset copied state after 2 seconds
+                    setTimeout(() => setCopied(false), 2000);
+                })
+                .catch((err) => {
+                    console.error('Failed to copy link: ', err);
+                });
         }
     };
 
@@ -50,17 +50,15 @@ const LinkShareModal = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={title}
-            confirmText={copied ? "Copied!" : "Copy"}
-            cancelText="Close"
+            title={title ?? t('linkShare.title')}
+            confirmText={copied ? t('linkShare.copied') : t('linkShare.copy')}
+            cancelText={t('modal.close')}
             onConfirm={handleCopyLink}
-            confirmButtonClass={copied ? "bg-green-600 hover:bg-green-700" : "bg-purple-500 hover:bg-purple-600"}
+            confirmButtonClass={copied ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-500 hover:bg-purple-600'}
             size="md"
         >
             <div className="space-y-4">
-                <p className="text-gray-600">
-                    Share this link with others to give them access to this file:
-                </p>
+                <p className="text-gray-600">{t('linkShare.description')}</p>
                 <div className="flex items-center gap-2">
                     <input
                         ref={linkInputRef}
@@ -72,7 +70,7 @@ const LinkShareModal = ({
                     <button
                         onClick={handleCopyLink}
                         className={`p-2 rounded-md ${copied ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500`}
-                        title={copied ? "Copied!" : "Copy to clipboard"}
+                        title={copied ? t('linkShare.copied') : t('linkShare.copy')}
                     >
                         {copied ? <Check size={20} /> : <Copy size={20} />}
                     </button>
@@ -80,13 +78,11 @@ const LinkShareModal = ({
                 {copied && (
                     <p className="text-sm text-green-600 flex items-center gap-1">
                         <Check size={16} />
-                        Link copied to clipboard!
+                        {t('linkShare.copiedHint')}
                     </p>
                 )}
                 <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                        Anyone with this link can access this file.
-                    </p>
+                    <p className="text-sm text-gray-500">{t('linkShare.footerNote')}</p>
                 </div>
             </div>
         </Modal>

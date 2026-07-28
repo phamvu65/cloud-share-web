@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { getPreviewKind, getPreviewMimeType } from '../util/filePreview.js';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 const INITIAL_STATE = { isOpen: false, file: null, url: '', kind: 'unsupported', loading: false, error: '' };
 
 export const useFilePreview = () => {
+    const { t } = useTranslation();
     const [state, setState] = useState(INITIAL_STATE);
     const objectUrlRef = useRef('');
 
@@ -41,9 +43,9 @@ export const useFilePreview = () => {
             setState({ isOpen: true, file, url: objectUrl, kind, loading: false, error: '' });
         } catch (error) {
             console.error('Error loading file preview:', error);
-            setState({ isOpen: true, file, url: '', kind, loading: false, error: 'Could not load preview for this file.' });
+            setState({ isOpen: true, file, url: '', kind, loading: false, error: t('filePreview.loadError') });
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => () => revokeCurrentUrl(), []);
 

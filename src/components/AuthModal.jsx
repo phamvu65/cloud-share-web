@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Loader2, X, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import googleIcon from '../assets/google.svg';
 
 const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
@@ -18,6 +19,7 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
     const [googleReady, setGoogleReady] = useState(false);
     const [googleInit, setGoogleInit] = useState(false);
     const { login, register, loginWithGoogle } = useAuth();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
@@ -57,9 +59,9 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
         script.async = true;
         script.defer = true;
         script.onload = () => setGoogleReady(true);
-        script.onerror = () => setError('Google login failed to load.');
+        script.onerror = () => setError(t('auth.googleLoadFailed'));
         document.body.appendChild(script);
-    }, [googleClientId]);
+    }, [googleClientId, t]);
 
     if (!isOpen) return null;
 
@@ -76,16 +78,12 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                 navigate('/dashboard');
             } else {
                 await register(firstName, lastName, identifier, password, username);
-                setSuccessMessage('Đăng ký thành công! Vui lòng đăng nhập.');
+                setSuccessMessage(t('auth.registerSuccess'));
                 setMode('signin');
                 setPassword('');
             }
         } catch (err) {
-            setError(
-                mode === 'signin'
-                    ? 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.'
-                    : 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.'
-            );
+            setError(mode === 'signin' ? t('auth.signInFailed') : t('auth.signUpFailed'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -94,7 +92,7 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
 
     const handleGoogleResponse = async (response) => {
         if (!response?.credential) {
-            setError('Google login failed. Please try again.');
+            setError(t('auth.googleLoginFailed'));
             return;
         }
 
@@ -104,7 +102,7 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
             onClose();
             navigate('/dashboard');
         } catch (err) {
-            setError('Google login failed. Please try again.');
+            setError(t('auth.googleLoginFailed'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -127,12 +125,12 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
 
     const handleGoogle = async () => {
         if (!googleClientId) {
-            setError('Google client ID is not configured.');
+            setError(t('auth.googleNotConfigured'));
             return;
         }
 
         if (!googleReady) {
-            setError('Google login is still loading. Please wait a moment.');
+            setError(t('auth.googleStillLoading'));
             return;
         }
 
@@ -141,27 +139,26 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
             window.google.accounts.id.prompt((notification) => {
                 if (notification?.isNotDisplayed?.()) {
                     const reason = notification.getNotDisplayedReason?.();
-                    const friendlyMessage = reason === 'suppressed_by_user'
-                        ? 'Google sign-in was blocked by the browser. Please allow third-party sign-in and try again.'
-                        : 'Google sign-in is currently unavailable in this browser.';
+                    const friendlyMessage = reason === 'suppressed_by_user' ? t('auth.googleBlocked') : t('auth.googleUnavailable');
                     setError(friendlyMessage);
                 } else if (notification?.isSkippedMoment?.()) {
                     const reason = notification.getSkippedReason?.();
-                    const friendlyMessage = reason === 'user_cancel'
-                        ? 'Google sign-in was canceled.'
-                        : 'Google sign-in was skipped. Please try again.';
+                    const friendlyMessage = reason === 'user_cancel' ? t('auth.googleCanceled') : t('auth.googleSkipped');
                     setError(friendlyMessage);
                 }
             });
         } catch (err) {
-            setError('Google sign-in is currently unavailable. Please try another browser or enable third-party sign-in.');
+            setError(t('auth.googleGenericUnavailable'));
             console.error(err);
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4" onClick={onClose}>
-            <div className="relative w-full max-w-md overflow-hidden rounded-[28px] bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="relative w-full max-w-md overflow-hidden rounded-[28px] bg-white shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <button
                     onClick={onClose}
                     className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
@@ -172,15 +169,11 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                 <div className="grid gap-8 p-8 sm:p-10">
                     <div className="space-y-6">
                         <div>
-                            <p className="text-sm uppercase tracking-[0.24em] text-purple-600">Cloud Share</p>
+                            <p className="text-sm uppercase tracking-[0.24em] text-purple-600">{t('nav.brand')}</p>
                             <h2 className="mt-3 text-3xl font-semibold text-gray-900">
-                                {mode === 'signin' ? 'Sign in to Cloud Share' : 'Create your account'}
+                                {mode === 'signin' ? t('auth.signInTitle') : t('auth.signUpTitle')}
                             </h2>
-                            <p className="mt-3 text-gray-500">
-                                {mode === 'signin'
-                                    ? 'Welcome back! Please sign in to continue.'
-                                    : 'Create an account to start sharing files securely.'}
-                            </p>
+                            <p className="mt-3 text-gray-500">{mode === 'signin' ? t('auth.signInSubtitle') : t('auth.signUpSubtitle')}</p>
                         </div>
 
                         <button
@@ -190,12 +183,12 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                             className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <img src={googleIcon} alt="Google" className="h-5 w-5" />
-                            Continue with Google
+                            {t('auth.continueWithGoogle')}
                         </button>
 
                         <div className="flex items-center gap-3 text-sm text-gray-500">
                             <span className="block h-px flex-1 bg-gray-200" />
-                            <span>or</span>
+                            <span>{t('common.or')}</span>
                             <span className="block h-px flex-1 bg-gray-200" />
                         </div>
 
@@ -203,26 +196,30 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                             {mode === 'signup' && (
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">First name</label>
+                                        <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">
+                                            {t('auth.firstName')}
+                                        </label>
                                         <input
                                             id="first-name"
                                             type="text"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
                                             className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                            placeholder="First name"
+                                            placeholder={t('auth.firstName')}
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="last-name" className="block text-sm font-medium text-gray-700">Last name</label>
+                                        <label htmlFor="last-name" className="block text-sm font-medium text-gray-700">
+                                            {t('auth.lastName')}
+                                        </label>
                                         <input
                                             id="last-name"
                                             type="text"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
                                             className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                            placeholder="Last name"
+                                            placeholder={t('auth.lastName')}
                                             required
                                         />
                                     </div>
@@ -231,46 +228,52 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
 
                             {mode === 'signup' && (
                                 <div>
-                                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username <span className="text-gray-400">(Optional)</span></label>
+                                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                                        {t('auth.username')} <span className="text-gray-400">({t('auth.optional')})</span>
+                                    </label>
                                     <input
                                         id="username"
                                         type="text"
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                        placeholder="Your username"
+                                        placeholder={t('auth.username')}
                                     />
                                 </div>
                             )}
 
                             <div>
-                                <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">Email or username</label>
+                                <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
+                                    {t('auth.emailOrUsername')}
+                                </label>
                                 <input
                                     id="identifier"
                                     type="text"
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
                                     className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                    placeholder="Email or username"
+                                    placeholder={t('auth.emailOrUsername')}
                                     required
                                 />
                             </div>
 
                             <div className="relative">
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                                    {t('auth.password')}
+                                </label>
                                 <input
                                     id="password"
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 pr-12 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                    placeholder="Create a password"
+                                    placeholder={t('auth.createPasswordPlaceholder')}
                                     required
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword((prev) => !prev)}
-                                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 transition hover:text-gray-700 "
+                                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 transition hover:text-gray-700"
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -284,37 +287,42 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                                 disabled={loading}
                                 className="inline-flex w-full items-center justify-center rounded-2xl bg-purple-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-60"
                             >
-                                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : mode === 'signin' ? 'Continue' : 'Create account'}
+                                {loading ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : mode === 'signin' ? (
+                                    t('auth.continue')
+                                ) : (
+                                    t('auth.createAccount')
+                                )}
                             </button>
                         </form>
 
                         <p className="text-center text-sm text-gray-500">
                             {mode === 'signin' ? (
                                 <>
-                                    Don’t have an account?{' '}
+                                    {t('auth.noAccount')}{' '}
                                     <button
                                         type="button"
                                         onClick={() => setMode('signup')}
                                         className="font-semibold text-purple-600 hover:underline"
                                     >
-                                        Sign up
+                                        {t('auth.signUp')}
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    Already have an account?{' '}
+                                    {t('auth.haveAccount')}{' '}
                                     <button
                                         type="button"
                                         onClick={() => setMode('signin')}
                                         className="font-semibold text-purple-600 hover:underline"
                                     >
-                                        Sign in
+                                        {t('auth.signIn')}
                                     </button>
                                 </>
                             )}
                         </p>
                     </div>
-
                 </div>
             </div>
         </div>

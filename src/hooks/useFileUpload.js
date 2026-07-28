@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { apiEndpoints } from '../util/apiEndpoints.js';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 export const useFileUpload = ({ token, maxFiles = 5, onUploadSuccess }) => {
+    const { t } = useTranslation();
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState('');
@@ -13,7 +15,7 @@ export const useFileUpload = ({ token, maxFiles = 5, onUploadSuccess }) => {
 
         setFiles((prevFiles) => {
             if (prevFiles.length + selectedFiles.length > maxFiles) {
-                setMessage(`You can only upload a maximum of ${maxFiles} files at once.`);
+                setMessage(t('upload.maxFilesError', { max: maxFiles }));
                 setMessageType('error');
                 return prevFiles;
             }
@@ -22,7 +24,7 @@ export const useFileUpload = ({ token, maxFiles = 5, onUploadSuccess }) => {
             setMessageType('');
             return [...prevFiles, ...selectedFiles];
         });
-    }, [maxFiles]);
+    }, [maxFiles, t]);
 
     const handleRemoveFile = useCallback((index) => {
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -32,19 +34,19 @@ export const useFileUpload = ({ token, maxFiles = 5, onUploadSuccess }) => {
 
     const handleUpload = useCallback(async () => {
         if (files.length === 0) {
-            setMessage('Please select at least one file to upload.');
+            setMessage(t('upload.selectAtLeastOne'));
             setMessageType('error');
             return;
         }
 
         if (files.length > maxFiles) {
-            setMessage(`You can only upload a maximum of ${maxFiles} files at once.`);
+            setMessage(t('upload.maxFilesError', { max: maxFiles }));
             setMessageType('error');
             return;
         }
 
         setUploading(true);
-        setMessage('Uploading files...');
+        setMessage(t('dashboard.uploading'));
         setMessageType('info');
 
         const formData = new FormData();
@@ -55,19 +57,19 @@ export const useFileUpload = ({ token, maxFiles = 5, onUploadSuccess }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            setMessage('Files uploaded successfully!');
+            setMessage(t('upload.uploadSuccess'));
             setMessageType('success');
             setFiles([]);
 
             await onUploadSuccess?.(response.data);
         } catch (error) {
             console.error('Error uploading files:', error);
-            setMessage(error.response?.data?.message || 'Error uploading files. Please try again.');
+            setMessage(error.response?.data?.message || t('upload.uploadError'));
             setMessageType('error');
         } finally {
             setUploading(false);
         }
-    }, [files, maxFiles, token, onUploadSuccess]);
+    }, [files, maxFiles, token, onUploadSuccess, t]);
 
     return {
         files,
