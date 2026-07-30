@@ -18,6 +18,7 @@ export const apiEndpoints = {
     TRANSACTIONS: `${BASE_URL}/transactions`,
     PUBLIC_FILE_VIEW: (fileId) => `${BASE_URL}/files/public/${fileId}`,
     COMPRESS_PDF: `${BASE_URL}/pdf/compress`,
+    TRANSLATE_PDF: `${BASE_URL}/pdf/translate`,
     GET_PDF_JOB: (id) => `${BASE_URL}/pdf/jobs/${id}`,
     LIST_PDF_JOBS: `${BASE_URL}/pdf/jobs`,
 }

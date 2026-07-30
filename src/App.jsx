@@ -13,6 +13,7 @@ import PdfToolsHub from "./pages/tools/PdfToolsHub.jsx";
 import MergePdf from "./pages/tools/MergePdf.jsx";
 import SplitPdf from "./pages/tools/SplitPdf.jsx";
 import CompressPdf from "./pages/tools/CompressPdf.jsx";
+import TranslatePdf from "./pages/tools/TranslatePdf.jsx";
 
 
 const App = () => {
@@ -33,6 +34,7 @@ const App = () => {
                         <Route path="/pdf-tools/merge" element={<MergePdf />} />
                         <Route path="/pdf-tools/split" element={<SplitPdf />} />
                         <Route path="/pdf-tools/compress" element={<CompressPdf />} />
+                        <Route path="/pdf-tools/translate" element={<TranslatePdf />} />
                         <Route path="/subscriptions" element={<Subscription />} />
                         <Route path="/transactions" element={<Transactions />} />
                     </Route>

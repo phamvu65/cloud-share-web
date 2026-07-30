@@ -10,12 +10,10 @@ const PdfToolsHub = () => {
         { to: '/pdf-tools/merge', icon: Combine, title: t('pdfTools.mergeTitle'), description: t('pdfTools.mergeDescription') },
         { to: '/pdf-tools/split', icon: Scissors, title: t('pdfTools.splitTitle'), description: t('pdfTools.splitDescription') },
         { to: '/pdf-tools/compress', icon: Shrink, title: t('pdfTools.compressTitle'), description: t('pdfTools.compressDescription') },
+        { to: '/pdf-tools/translate', icon: Languages, title: t('pdfTools.translateTitle'), description: t('pdfTools.translateDescription') },
     ];
 
-    const COMING_SOON = [
-        { icon: FileEdit, title: t('pdfTools.editTitle'), description: t('pdfTools.editDescription') },
-        { icon: Languages, title: t('pdfTools.translateTitle'), description: t('pdfTools.translateDescription') },
-    ];
+    const COMING_SOON = [{ icon: FileEdit, title: t('pdfTools.editTitle'), description: t('pdfTools.editDescription') }];
 
     return (
         <DashboardLayout activeMenu="pdfTools">
