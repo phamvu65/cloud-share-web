@@ -8,15 +8,15 @@ const DashboardLayout = ({children, activeMenu}) => {
         <div>
             {/* Navbar component goes here*/}
             <Navbar activeMenu={activeMenu}/>
-            {isAuthenticated && user && (
-                <div className="flex">
+            <div className="flex">
+                {isAuthenticated && user && (
                     <div className="max-[1080px]:hidden">
-                        {/* Sidemenu goes here */}
+                        {/* Sidemenu goes here - only relevant once there's an account to manage */}
                         <SideMenu activeMenu={activeMenu}/>
                     </div>
-                    <div className="grow mx-5">{children}</div>
-                </div>
-            )}
+                )}
+                <div className="grow mx-5">{children}</div>
+            </div>
         </div>
     )
 }
