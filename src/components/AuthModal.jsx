@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import googleIcon from '../assets/google.svg';
 
-const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
+const AuthModal = ({ isOpen, initialMode = 'signin', onClose, onAuthenticated }) => {
     const [mode, setMode] = useState(initialMode);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -75,7 +75,11 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
             if (mode === 'signin') {
                 await login(identifier, password);
                 onClose();
-                navigate('/dashboard');
+                if (onAuthenticated) {
+                    onAuthenticated();
+                } else {
+                    navigate('/dashboard');
+                }
             } else {
                 await register(firstName, lastName, identifier, password, username);
                 setSuccessMessage(t('auth.registerSuccess'));
@@ -100,7 +104,11 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
         try {
             await loginWithGoogle(response.credential);
             onClose();
-            navigate('/dashboard');
+            if (onAuthenticated) {
+                onAuthenticated();
+            } else {
+                navigate('/dashboard');
+            }
         } catch (err) {
             setError(t('auth.googleLoginFailed'));
             console.error(err);

@@ -19,6 +19,9 @@ export const apiEndpoints = {
     PUBLIC_FILE_VIEW: (fileId) => `${BASE_URL}/files/public/${fileId}`,
     COMPRESS_PDF: `${BASE_URL}/pdf/compress`,
     TRANSLATE_PDF: `${BASE_URL}/pdf/translate`,
+    CONVERT_FROM_PDF: `${BASE_URL}/pdf/from-pdf`,
+    CONVERT_TO_PDF: `${BASE_URL}/pdf/to-pdf`,
     GET_PDF_JOB: (id) => `${BASE_URL}/pdf/jobs/${id}`,
     LIST_PDF_JOBS: `${BASE_URL}/pdf/jobs`,
+    DOWNLOAD_PDF_JOB_RESULT: (id) => `${BASE_URL}/pdf/jobs/${id}/download`,
 }
