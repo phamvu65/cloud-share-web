@@ -1,11 +1,11 @@
 import HeroSection from '../components/landing/HeroSection';
+import PdfToolsSection from '../components/landing/PdfToolsSection';
 import FeaturesSection from '../components/landing/FeaturesSection';
-import PricingSection from '../components/landing/PricingSection';
 import TestimonialsSection from '../components/landing/TestimonialsSection';
 import CTASection from '../components/landing/CTASection';
 import Footer from '../components/landing/Footer';
 
-import { features, pricingPlans, testimonials } from '../assets/data.js';
+import { features, testimonials } from '../assets/data.js';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -40,14 +40,14 @@ const Landing = () => {
                 <LanguageToggle className="rounded-full bg-white/90 px-3 py-2 shadow-md backdrop-blur" />
             </div>
 
-            {/* Hero Section */}
-            <HeroSection openSignIn={openSignIn} openSignUp={openSignUp} />
+            {/* Hero + PDF Tools / File Converter share one continuous background */}
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50">
+                <HeroSection openSignIn={openSignIn} openSignUp={openSignUp} />
+                <PdfToolsSection />
+            </div>
 
             {/* Features Section */}
             <FeaturesSection features={features} />
-
-            {/* Pricing Section */}
-            <PricingSection pricingPlans={pricingPlans} openSignUp={openSignUp} />
 
             {/* Testimonials Section */}
             <TestimonialsSection testimonials={testimonials} />
