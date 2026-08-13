@@ -3,12 +3,13 @@ import { Navigate, useParams } from 'react-router-dom';
 import PdfToolLayout from '../../layout/PdfToolLayout.jsx';
 import PdfDropzone from '../../components/tools/PdfDropzone.jsx';
 import AuthModal from '../../components/AuthModal.jsx';
+import JobProgressBar from '../../components/tools/JobProgressBar.jsx';
 import { usePdfJob } from '../../hooks/usePdfJob.js';
 import { apiEndpoints } from '../../util/apiEndpoints.js';
 import { formatFileSize } from '../../util/downloadBlob.js';
 import { TO_PDF_FORMATS } from '../../util/pdfConvertFormats.js';
 import { useTranslation } from '../../context/LanguageContext.jsx';
-import { AlertCircle, FileText, LogIn, Loader2, X } from 'lucide-react';
+import { AlertCircle, FileText, LogIn, X } from 'lucide-react';
 
 const ConvertToPdf = () => {
     const { format } = useParams();
@@ -78,20 +79,18 @@ const ConvertToPdf = () => {
                     </div>
                 )}
 
-                {job.file && job.step !== 'awaiting-login' && (
-                    <button
-                        onClick={handleConvert}
-                        disabled={job.isBusy}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
-                    >
-                        {job.isBusy ? (
-                            <>
-                                <Loader2 size={18} className="animate-spin" /> {statusLabel}
-                            </>
-                        ) : (
-                            t('pdfTools.convertButton')
-                        )}
-                    </button>
+                {job.isBusy ? (
+                    <JobProgressBar label={statusLabel} progress={job.progress} />
+                ) : (
+                    job.file &&
+                    job.step !== 'awaiting-login' && (
+                        <button
+                            onClick={handleConvert}
+                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
+                        >
+                            {t('pdfTools.convertButton')}
+                        </button>
+                    )
                 )}
 
                 {job.step === 'awaiting-login' && (

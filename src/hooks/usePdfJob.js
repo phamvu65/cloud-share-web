@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { apiEndpoints } from '../util/apiEndpoints.js';
 import { downloadBlob } from '../util/downloadBlob.js';
+import { clearPendingDownload, savePendingDownload } from '../util/pendingDownload.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const POLL_INTERVAL_MS = 2000;
@@ -27,6 +28,7 @@ export const usePdfJob = () => {
     const [file, setFile] = useState(null);
     const [step, setStep] = useState('idle'); // idle | uploading | PENDING | PROCESSING | awaiting-login | completed | failed
     const [error, setError] = useState('');
+    const [progress, setProgress] = useState(0); // 0-100, best-effort estimate shown on the progress bar
     const isCancelledRef = useRef(false);
     const pendingDownloadRef = useRef(null); // { jobId, downloadName } once completed but not yet downloaded
 
@@ -41,15 +43,21 @@ export const usePdfJob = () => {
         setFile(files[0]);
         setStep('idle');
         setError('');
+        setProgress(0);
     };
 
     const reset = () => {
         setFile(null);
         setStep('idle');
         setError('');
+        setProgress(0);
         pendingDownloadRef.current = null;
+        clearPendingDownload();
     };
 
+    // The server doesn't report a real completion percentage while a job is
+    // PENDING/PROCESSING, so nudge the bar forward on every poll tick (capped
+    // well short of 100) unless the job response includes its own `progress`.
     const pollJob = async (jobId) => {
         while (!isCancelledRef.current) {
             const res = await axios.get(apiEndpoints.GET_PDF_JOB(jobId), {
@@ -60,7 +68,16 @@ export const usePdfJob = () => {
             if (isCancelledRef.current) return null;
             setStep(job.status);
 
+            if (typeof job.progress === 'number') {
+                setProgress(Math.min(99, Math.max(30, job.progress)));
+            } else {
+                // Ease toward the cap instead of jumping by a fixed amount, so the bar
+                // keeps crawling forward on long jobs instead of stalling at 90% early.
+                setProgress((prev) => Math.min(90, prev + Math.max(1, Math.round((90 - prev) * 0.1))));
+            }
+
             if (job.status === 'COMPLETED' || job.status === 'FAILED') {
+                if (job.status === 'COMPLETED') setProgress(100);
                 return job;
             }
             await sleep(POLL_INTERVAL_MS);
@@ -89,6 +106,7 @@ export const usePdfJob = () => {
         try {
             await downloadFinishedJob(pending.jobId, pending.downloadName);
             pendingDownloadRef.current = null;
+            clearPendingDownload();
             setStep('completed');
         } catch (err) {
             console.error('Error downloading PDF job result:', err);
@@ -110,6 +128,7 @@ export const usePdfJob = () => {
         const activeFile = sourceFile || file;
         if (!activeFile) return;
         setError('');
+        setProgress(0);
 
         try {
             let fileId;
@@ -121,6 +140,9 @@ export const usePdfJob = () => {
                 formData.append('files', file);
                 const uploadRes = await axios.post(apiEndpoints.UPLOAD_FILE, formData, {
                     headers: authHeaders(token),
+                    onUploadProgress: (event) => {
+                        if (event.total) setProgress(Math.round((event.loaded / event.total) * 25));
+                    },
                 });
 
                 fileId = extractUploadedFileId(uploadRes.data);
@@ -129,6 +151,7 @@ export const usePdfJob = () => {
                 }
             }
 
+            setProgress(30);
             setStep('PENDING');
             const jobRes = await axios.post(jobEndpoint, buildPayload(fileId), {
                 headers: authHeaders(token),
@@ -144,8 +167,12 @@ export const usePdfJob = () => {
                 await downloadFinishedJob(finalJob.id, buildDownloadName(activeFile.name));
                 setStep('completed');
             } else {
-                // Job is done and waiting on disk - park it until the user signs in.
-                pendingDownloadRef.current = { jobId: finalJob.id, downloadName: buildDownloadName(activeFile.name) };
+                // Job is done and waiting on disk - park it until the user signs in. Persisted
+                // to localStorage too, so the download can still resume after a page refresh
+                // or a login that happens somewhere other than this page (e.g. the navbar).
+                const pending = { jobId: finalJob.id, downloadName: buildDownloadName(activeFile.name) };
+                pendingDownloadRef.current = pending;
+                savePendingDownload(pending.jobId, pending.downloadName);
                 setStep('awaiting-login');
             }
         } catch (err) {
@@ -157,5 +184,5 @@ export const usePdfJob = () => {
 
     const isBusy = step === 'uploading' || step === 'PENDING' || step === 'PROCESSING';
 
-    return { file, handleFiles, reset, step, error, isBusy, isAuthenticated, run, completeDownload };
+    return { file, handleFiles, reset, step, error, progress, isBusy, isAuthenticated, run, completeDownload };
 };
