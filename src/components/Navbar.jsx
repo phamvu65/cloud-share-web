@@ -1,12 +1,9 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Menu, Share2, X, LogOut, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import SideMenu from './SideMenu.jsx';
-import CreditsDisplay from './CreditsDisplay.jsx';
 import AuthModal from './AuthModal.jsx';
 import AccountModal from './AccountModal.jsx';
 import LanguageToggle from './LanguageToggle.jsx';
-import { UserCreditsContext } from '../context/UserCreditsContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTranslation } from '../context/LanguageContext.jsx';
 
@@ -17,15 +14,8 @@ const Navbar = ({ activeMenu }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const { credits, fetchUserCredits } = useContext(UserCreditsContext);
     const { isAuthenticated, logout, user } = useAuth();
     const { t } = useTranslation();
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchUserCredits();
-        }
-    }, [isAuthenticated, fetchUserCredits]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -60,10 +50,6 @@ const Navbar = ({ activeMenu }) => {
 
                 {/* Authenticated View */}
                 {isAuthenticated && (
-                    <>
-                        <Link to="/subscriptions">
-                            <CreditsDisplay credits={credits} />
-                        </Link>
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -131,7 +117,6 @@ const Navbar = ({ activeMenu }) => {
                                 </div>
                             )}
                         </div>
-                    </>
                 )}
 
                 {/* Unauthenticated View */}

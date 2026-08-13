@@ -2,13 +2,18 @@ import { useRef } from 'react';
 import { FileUp } from 'lucide-react';
 import { useTranslation } from '../../context/LanguageContext.jsx';
 
-const PdfDropzone = ({ multiple = false, onFiles, label }) => {
+const DEFAULT_EXTENSIONS = ['pdf'];
+
+const PdfDropzone = ({ multiple = false, onFiles, label, accept = 'application/pdf', extensions = DEFAULT_EXTENSIONS }) => {
     const inputRef = useRef(null);
     const { t } = useTranslation();
 
     const handleFiles = (fileList) => {
-        const pdfFiles = Array.from(fileList).filter((f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
-        if (pdfFiles.length > 0) onFiles(pdfFiles);
+        const matching = Array.from(fileList).filter((f) => {
+            const ext = f.name.toLowerCase().split('.').pop();
+            return extensions.includes(ext);
+        });
+        if (matching.length > 0) onFiles(matching);
     };
 
     return (
@@ -27,11 +32,13 @@ const PdfDropzone = ({ multiple = false, onFiles, label }) => {
                 </div>
             </div>
             <p className="text-gray-700">{label || t('pdfTools.dropzoneLabel')}</p>
-            <p className="mt-1 text-sm text-gray-500">{multiple ? t('pdfTools.dropzoneBrowseMultiple') : t('pdfTools.dropzoneBrowse')}</p>
+            <p className="mt-1 text-sm text-gray-500">
+                {multiple ? t('pdfTools.dropzoneBrowseMultiple') : t('pdfTools.dropzoneBrowse')}
+            </p>
             <input
                 ref={inputRef}
                 type="file"
-                accept="application/pdf"
+                accept={accept}
                 multiple={multiple}
                 className="hidden"
                 onChange={(e) => {

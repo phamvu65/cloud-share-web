@@ -21,6 +21,9 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Bumps the rem base so every Tailwind text-* utility scales up uniformly
+     across the whole app, instead of editing each component individually. */
+  font-size: 112.5%; /* 18px base instead of the browser default 16px */
 }
 
 body {

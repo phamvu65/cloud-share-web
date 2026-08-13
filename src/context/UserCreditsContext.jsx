@@ -1,7 +1,6 @@
 import {createContext, useCallback, useEffect, useState} from "react";
 import axios from "axios";
 import {apiEndpoints} from "../util/apiEndpoints.js";
-import toast from "react-hot-toast";
 import { useAuth } from "./AuthContext.jsx";
 
 export const UserCreditsContext = createContext();
@@ -20,11 +19,7 @@ export const UserCreditsProvider = ({children}) => {
 
         try {
             const response = await axios.get(apiEndpoints.GET_CREDITS, {headers: {Authorization: `Bearer ${token}`}});
-            if (response.status === 200) {
-                setCredits(response.data.credits);
-            } else {
-                toast.error('Unable to get the credits.');
-            }
+            setCredits(response.data.credits);
         }catch (error) {
             console.error('Error fetching the user credits', error);
         }finally {

@@ -1,6 +1,4 @@
 import DashboardLayout from '../layout/DashboardLayout.jsx';
-import { useContext } from 'react';
-import { UserCreditsContext } from '../context/UserCreditsContext.jsx';
 import { AlertCircle } from 'lucide-react';
 import UploadBox from '../components/UploadBox.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -10,15 +8,13 @@ const MAX_FILES = 5;
 
 const Upload = () => {
     const { token } = useAuth();
-    const { credits, fetchUserCredits } = useContext(UserCreditsContext);
 
     const { files, uploading, message, messageType, handleFileChange, handleRemoveFile, handleUpload } = useFileUpload({
         token,
         maxFiles: MAX_FILES,
-        onUploadSuccess: fetchUserCredits,
     });
 
-    const isUploadDisabled = files.length === 0 || files.length > MAX_FILES || credits <= 0 || files.length > credits;
+    const isUploadDisabled = files.length === 0 || files.length > MAX_FILES;
 
     return (
         <DashboardLayout activeMenu="upload">
@@ -38,7 +34,6 @@ const Upload = () => {
                     onUpload={handleUpload}
                     uploading={uploading}
                     onRemoveFile={handleRemoveFile}
-                    remainingCredits={credits}
                     isUploadDisabled={isUploadDisabled}
                 />
             </div>

@@ -13,6 +13,10 @@ import PdfToolsHub from "./pages/tools/PdfToolsHub.jsx";
 import MergePdf from "./pages/tools/MergePdf.jsx";
 import SplitPdf from "./pages/tools/SplitPdf.jsx";
 import CompressPdf from "./pages/tools/CompressPdf.jsx";
+import TranslatePdf from "./pages/tools/TranslatePdf.jsx";
+import ConvertFromPdf from "./pages/tools/ConvertFromPdf.jsx";
+import ConvertToPdf from "./pages/tools/ConvertToPdf.jsx";
+import FileConverterHub from "./pages/tools/FileConverterHub.jsx";
 
 
 const App = () => {
@@ -21,18 +25,23 @@ const App = () => {
             <BrowserRouter>
                 <Toaster />
                 <Routes>
-                    {/* Public Routes */}
+                    {/* Public Routes - tools work without an account; only downloading a
+                        job result (gated inside each tool) requires login. */}
                     <Route path="/" element={<Landing />} />
                     <Route path="/file/:fileId" element={<PublicFileView />} />
+                    <Route path="/pdf-tools" element={<PdfToolsHub />} />
+                    <Route path="/pdf-tools/merge" element={<MergePdf />} />
+                    <Route path="/pdf-tools/split" element={<SplitPdf />} />
+                    <Route path="/pdf-tools/compress" element={<CompressPdf />} />
+                    <Route path="/pdf-tools/translate" element={<TranslatePdf />} />
+                    <Route path="/file-converter" element={<FileConverterHub />} />
+                    <Route path="/file-converter/from-pdf/:format" element={<ConvertFromPdf />} />
+                    <Route path="/file-converter/to-pdf/:format" element={<ConvertToPdf />} />
                     {/* Private Routes */}
                     <Route element={<PrivateRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/upload" element={<Upload />} />
                         <Route path="/my-files" element={<MyFiles />} />
-                        <Route path="/pdf-tools" element={<PdfToolsHub />} />
-                        <Route path="/pdf-tools/merge" element={<MergePdf />} />
-                        <Route path="/pdf-tools/split" element={<SplitPdf />} />
-                        <Route path="/pdf-tools/compress" element={<CompressPdf />} />
                         <Route path="/subscriptions" element={<Subscription />} />
                         <Route path="/transactions" element={<Transactions />} />
                     </Route>

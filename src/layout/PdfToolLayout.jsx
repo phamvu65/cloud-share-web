@@ -3,13 +3,20 @@ import { ArrowLeft } from 'lucide-react';
 import DashboardLayout from './DashboardLayout.jsx';
 import { useTranslation } from '../context/LanguageContext.jsx';
 
-const PdfToolLayout = ({ title, description, children }) => {
+const PdfToolLayout = ({
+    title,
+    description,
+    children,
+    backTo = '/pdf-tools',
+    activeMenu = 'pdfTools',
+    backLabel,
+}) => {
     const { t } = useTranslation();
     return (
-        <DashboardLayout activeMenu="pdfTools">
+        <DashboardLayout activeMenu={activeMenu}>
             <div className="p-6">
-                <Link to="/pdf-tools" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-purple-600">
-                    <ArrowLeft size={16} /> {t('pdfTools.backToTools')}
+                <Link to={backTo} className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-purple-600">
+                    <ArrowLeft size={16} /> {backLabel || t('pdfTools.backToTools')}
                 </Link>
 
                 <div className="mx-auto max-w-3xl">

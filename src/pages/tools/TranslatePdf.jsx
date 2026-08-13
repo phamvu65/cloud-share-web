@@ -6,41 +6,49 @@ import JobProgressBar from '../../components/tools/JobProgressBar.jsx';
 import { usePdfJob } from '../../hooks/usePdfJob.js';
 import { formatFileSize } from '../../util/downloadBlob.js';
 import { apiEndpoints } from '../../util/apiEndpoints.js';
+import { AUTO_DETECT_CODE, TRANSLATE_LANGUAGES } from '../../util/translateLanguages.js';
 import { useTranslation } from '../../context/LanguageContext.jsx';
-import { AlertCircle, FileText, LogIn, X } from 'lucide-react';
+import { AlertCircle, FileText, Languages, LogIn, X } from 'lucide-react';
 
-const CompressPdf = () => {
+const ACCEPTED_EXTENSIONS = ['doc', 'docx'];
+
+const TranslatePdf = () => {
     const { t } = useTranslation();
     const job = usePdfJob();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [quality, setQuality] = useState(50);
+    const [sourceLanguage, setSourceLanguage] = useState(AUTO_DETECT_CODE);
+    const [targetLanguage, setTargetLanguage] = useState('vi');
 
-    const QUALITY_PRESETS = [
-        { label: t('pdfTools.compressStrong'), hint: t('pdfTools.compressStrongHint'), value: 20 },
-        { label: t('pdfTools.compressBalanced'), hint: t('pdfTools.compressBalancedHint'), value: 50 },
-        { label: t('pdfTools.compressHigh'), hint: t('pdfTools.compressHighHint'), value: 80 },
-    ];
-
-    const handleCompress = () =>
+    const handleTranslate = () =>
         job.run({
-            jobEndpoint: apiEndpoints.COMPRESS_PDF,
-            buildPayload: (fileId) => ({ fileId, quality }),
-            buildDownloadName: (name) => `${name.replace(/\.pdf$/i, '')}-compressed.pdf`,
-            failedMessage: t('pdfTools.compressFailed'),
-            genericErrorMessage: t('pdfTools.compressGenericError'),
+            jobEndpoint: apiEndpoints.TRANSLATE_PDF,
+            buildPayload: (fileId) => ({ fileId, sourceLanguage, targetLanguage }),
+            buildDownloadName: (name) => {
+                const dotIndex = name.lastIndexOf('.');
+                const baseName = dotIndex > 0 ? name.slice(0, dotIndex) : name;
+                const extension = dotIndex > 0 ? name.slice(dotIndex) : '.pdf';
+                return `${baseName}-${targetLanguage}${extension}`;
+            },
+            failedMessage: t('pdfTools.translateFailed'),
+            genericErrorMessage: t('pdfTools.translateGenericError'),
         });
 
     const statusLabel = {
         uploading: t('pdfTools.uploadingStatus'),
         PENDING: t('pdfTools.queuedStatus'),
-        PROCESSING: t('pdfTools.processingStatus'),
+        PROCESSING: t('pdfTools.translatingStatus'),
     }[job.step];
 
     return (
-        <PdfToolLayout title={t('pdfTools.compressPageTitle')} description={t('pdfTools.compressPageDescription')}>
+        <PdfToolLayout title={t('pdfTools.translatePageTitle')} description={t('pdfTools.translatePageDescription')}>
             <div className="space-y-6">
                 {!job.file ? (
-                    <PdfDropzone onFiles={job.handleFiles} label={t('pdfTools.dropzoneLabelSingle')} />
+                    <PdfDropzone
+                        onFiles={job.handleFiles}
+                        label={t('pdfTools.translateDropzoneLabel')}
+                        accept=".doc,.docx"
+                        extensions={ACCEPTED_EXTENSIONS}
+                    />
                 ) : (
                     <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4">
                         <div className="flex items-center gap-3">
@@ -60,23 +68,42 @@ const CompressPdf = () => {
 
                 {job.file && (
                     <div className="rounded-lg border border-gray-200 bg-white p-5">
-                        <p className="mb-3 text-sm font-medium text-gray-700">{t('pdfTools.compressionLevel')}</p>
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            {QUALITY_PRESETS.map((preset) => (
-                                <button
-                                    key={preset.value}
-                                    onClick={() => setQuality(preset.value)}
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label className="mb-1 block text-xs font-medium text-gray-600">
+                                    {t('pdfTools.sourceLanguage')}
+                                </label>
+                                <select
+                                    value={sourceLanguage}
+                                    onChange={(e) => setSourceLanguage(e.target.value)}
                                     disabled={job.isBusy}
-                                    className={`rounded-lg border px-4 py-3 text-left text-sm transition disabled:opacity-50 ${
-                                        quality === preset.value
-                                            ? 'border-purple-500 bg-purple-50 text-purple-700'
-                                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                                    }`}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
                                 >
-                                    <span className="block font-semibold">{preset.label}</span>
-                                    <span className="text-xs opacity-80">{preset.hint}</span>
-                                </button>
-                            ))}
+                                    <option value={AUTO_DETECT_CODE}>{t('pdfTools.autoDetect')}</option>
+                                    {TRANSLATE_LANGUAGES.map((lang) => (
+                                        <option key={lang.code} value={lang.code}>
+                                            {lang.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-xs font-medium text-gray-600">
+                                    {t('pdfTools.targetLanguage')}
+                                </label>
+                                <select
+                                    value={targetLanguage}
+                                    onChange={(e) => setTargetLanguage(e.target.value)}
+                                    disabled={job.isBusy}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
+                                >
+                                    {TRANSLATE_LANGUAGES.map((lang) => (
+                                        <option key={lang.code} value={lang.code}>
+                                            {lang.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -94,10 +121,11 @@ const CompressPdf = () => {
                     job.file &&
                     job.step !== 'awaiting-login' && (
                         <button
-                            onClick={handleCompress}
+                            onClick={handleTranslate}
                             className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
                         >
-                            {t('pdfTools.compressButton')}
+                            <Languages size={18} />
+                            {t('pdfTools.translateButton')}
                         </button>
                     )
                 )}
@@ -117,7 +145,7 @@ const CompressPdf = () => {
 
                 {job.step === 'completed' && (
                     <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center text-sm text-green-800">
-                        {t('pdfTools.compressSuccess')}
+                        {t('pdfTools.translateSuccess')}
                     </div>
                 )}
             </div>
@@ -126,10 +154,10 @@ const CompressPdf = () => {
                 isOpen={isAuthModalOpen}
                 initialMode="signin"
                 onClose={() => setIsAuthModalOpen(false)}
-                onAuthenticated={() => job.completeDownload(t('pdfTools.compressGenericError'))}
+                onAuthenticated={() => job.completeDownload(t('pdfTools.translateGenericError'))}
             />
         </PdfToolLayout>
     );
 };
 
-export default CompressPdf;
+export default TranslatePdf;

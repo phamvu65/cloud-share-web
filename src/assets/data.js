@@ -1,4 +1,4 @@
-import {CreditCard, Files, LayoutDashboard, Receipt, Upload, Wrench} from "lucide-react";
+import {ArrowLeftRight, Files, LayoutDashboard, Upload, Wrench} from "lucide-react";
 
 // Display text for these three lists lives in src/i18n/translations.js
 // (landing.feature*, landing.pricing*, landing.testimonial*) so it can be
@@ -57,16 +57,9 @@ export const SIDE_MENU_DATA = [
     },
     {
         id: "05",
-        key: "subscription",
-        label: "Subscription",
-        icon: CreditCard,
-        path: "/subscriptions",
+        key: "fileConverter",
+        label: "File Converter",
+        icon: ArrowLeftRight,
+        path: "/file-converter",
     },
-    {
-        id: "06",
-        key: "transactions",
-        label: "Transactions",
-        icon: Receipt,
-        path: "/transactions",
-    }
 ];

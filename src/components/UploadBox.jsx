@@ -2,7 +2,7 @@ import { ArrowUpFromLine, X, FileIcon, Loader2 } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from '../context/LanguageContext.jsx';
 
-const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, remainingCredits, isUploadDisabled }) => {
+const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, isUploadDisabled }) => {
     const fileInputRef = useRef(null);
     const { t } = useTranslation();
 
@@ -39,12 +39,9 @@ const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, rem
 
     return (
         <div className="w-full max-w-3xl mx-auto">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <ArrowUpFromLine className="text-blue-600" size={20} />
-                    <h2 className="text-lg font-medium">{t('uploadBox.title')}</h2>
-                </div>
-                <div className="text-sm text-gray-500">{t('uploadBox.creditsRemaining', { count: remainingCredits })}</div>
+            <div className="flex items-center gap-2 mb-2">
+                <ArrowUpFromLine className="text-blue-600" size={20} />
+                <h2 className="text-lg font-medium">{t('uploadBox.title')}</h2>
             </div>
 
             <div
@@ -58,7 +55,7 @@ const UploadBox = ({ files, onFileChange, onUpload, uploading, onRemoveFile, rem
                         <ArrowUpFromLine size={24} className="text-blue-600" />
                     </div>
                     <p className="text-gray-700 mb-1">{t('uploadBox.dragDrop')}</p>
-                    <p className="text-gray-500 text-sm mb-2">{t('uploadBox.browse', { count: remainingCredits })}</p>
+                    <p className="text-gray-500 text-sm mb-2">{t('uploadBox.browseShort')}</p>
                     <input ref={fileInputRef} type="file" multiple onChange={onFileChange} className="hidden" accept="*/*" max={5} />
                 </div>
             </div>

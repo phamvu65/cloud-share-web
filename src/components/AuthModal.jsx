@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import googleIcon from '../assets/google.svg';
 
-const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
+const AuthModal = ({ isOpen, initialMode = 'signin', onClose, onAuthenticated }) => {
     const [mode, setMode] = useState(initialMode);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -75,7 +75,11 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
             if (mode === 'signin') {
                 await login(identifier, password);
                 onClose();
-                navigate('/dashboard');
+                if (onAuthenticated) {
+                    onAuthenticated();
+                } else {
+                    navigate('/dashboard');
+                }
             } else {
                 await register(firstName, lastName, identifier, password, username);
                 setSuccessMessage(t('auth.registerSuccess'));
@@ -100,7 +104,11 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
         try {
             await loginWithGoogle(response.credential);
             onClose();
-            navigate('/dashboard');
+            if (onAuthenticated) {
+                onAuthenticated();
+            } else {
+                navigate('/dashboard');
+            }
         } catch (err) {
             setError(t('auth.googleLoginFailed'));
             console.error(err);
@@ -257,26 +265,28 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose }) => {
                                 />
                             </div>
 
-                            <div className="relative">
+                            <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                     {t('auth.password')}
                                 </label>
-                                <input
-                                    id="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 pr-12 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                    placeholder={t('auth.createPasswordPlaceholder')}
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword((prev) => !prev)}
-                                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 transition hover:text-gray-700"
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
+                                <div className="relative mt-2">
+                                    <input
+                                        id="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 pr-12 text-lg text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                                        placeholder={mode === 'signin' ? t('auth.enterPasswordPlaceholder') : t('auth.createPasswordPlaceholder')}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword((prev) => !prev)}
+                                        className="absolute inset-y-0 right-3 flex items-center text-gray-500 transition hover:text-gray-700"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
                             </div>
 
                             {successMessage && <p className="text-sm text-green-600">{successMessage}</p>}
