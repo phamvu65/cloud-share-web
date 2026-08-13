@@ -2,25 +2,21 @@ import { useState } from 'react';
 import PdfToolLayout from '../../layout/PdfToolLayout.jsx';
 import PdfDropzone from '../../components/tools/PdfDropzone.jsx';
 import AuthModal from '../../components/AuthModal.jsx';
+import JobProgressBar from '../../components/tools/JobProgressBar.jsx';
 import { usePdfJob } from '../../hooks/usePdfJob.js';
 import { formatFileSize } from '../../util/downloadBlob.js';
 import { apiEndpoints } from '../../util/apiEndpoints.js';
+import { AUTO_DETECT_CODE, TRANSLATE_LANGUAGES } from '../../util/translateLanguages.js';
 import { useTranslation } from '../../context/LanguageContext.jsx';
-import { AlertCircle, FileText, Languages, LogIn, Loader2, X } from 'lucide-react';
+import { AlertCircle, FileText, Languages, LogIn, X } from 'lucide-react';
 
 const ACCEPTED_EXTENSIONS = ['doc', 'docx'];
-
-// This tool only supports English <-> Vietnamese.
-const LANGUAGES = [
-    { code: 'en', label: 'English' },
-    { code: 'vi', label: 'Tiếng Việt' },
-];
 
 const TranslatePdf = () => {
     const { t } = useTranslation();
     const job = usePdfJob();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [sourceLanguage, setSourceLanguage] = useState('en');
+    const [sourceLanguage, setSourceLanguage] = useState(AUTO_DETECT_CODE);
     const [targetLanguage, setTargetLanguage] = useState('vi');
 
     const handleTranslate = () =>
@@ -83,7 +79,8 @@ const TranslatePdf = () => {
                                     disabled={job.isBusy}
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
                                 >
-                                    {LANGUAGES.map((lang) => (
+                                    <option value={AUTO_DETECT_CODE}>{t('pdfTools.autoDetect')}</option>
+                                    {TRANSLATE_LANGUAGES.map((lang) => (
                                         <option key={lang.code} value={lang.code}>
                                             {lang.label}
                                         </option>
@@ -100,7 +97,7 @@ const TranslatePdf = () => {
                                     disabled={job.isBusy}
                                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
                                 >
-                                    {LANGUAGES.map((lang) => (
+                                    {TRANSLATE_LANGUAGES.map((lang) => (
                                         <option key={lang.code} value={lang.code}>
                                             {lang.label}
                                         </option>
@@ -118,23 +115,19 @@ const TranslatePdf = () => {
                     </div>
                 )}
 
-                {job.file && job.step !== 'awaiting-login' && (
-                    <button
-                        onClick={handleTranslate}
-                        disabled={job.isBusy}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
-                    >
-                        {job.isBusy ? (
-                            <>
-                                <Loader2 size={18} className="animate-spin" /> {statusLabel}
-                            </>
-                        ) : (
-                            <>
-                                <Languages size={18} />
-                                {t('pdfTools.translateButton')}
-                            </>
-                        )}
-                    </button>
+                {job.isBusy ? (
+                    <JobProgressBar label={statusLabel} progress={job.progress} />
+                ) : (
+                    job.file &&
+                    job.step !== 'awaiting-login' && (
+                        <button
+                            onClick={handleTranslate}
+                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
+                        >
+                            <Languages size={18} />
+                            {t('pdfTools.translateButton')}
+                        </button>
+                    )
                 )}
 
                 {job.step === 'awaiting-login' && (

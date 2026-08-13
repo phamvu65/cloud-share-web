@@ -4,18 +4,14 @@ import JSZip from 'jszip';
 import { AlertCircle, ArrowLeft, FileText, LogIn, Loader2, Languages, Scissors, Shrink, X } from 'lucide-react';
 import PdfDropzone from '../tools/PdfDropzone.jsx';
 import AuthModal from '../AuthModal.jsx';
+import JobProgressBar from '../tools/JobProgressBar.jsx';
 import { usePdfJob } from '../../hooks/usePdfJob.js';
 import { apiEndpoints } from '../../util/apiEndpoints.js';
 import { downloadBlob, formatFileSize } from '../../util/downloadBlob.js';
 import { everyPageAsRange, parsePageRanges } from '../../util/pdfPageRanges.js';
 import { FROM_PDF_FORMATS, TO_PDF_FORMATS } from '../../util/pdfConvertFormats.js';
+import { AUTO_DETECT_CODE, TRANSLATE_LANGUAGES } from '../../util/translateLanguages.js';
 import { useTranslation } from '../../context/LanguageContext.jsx';
-
-// This tool only supports English <-> Vietnamese.
-const LANGUAGES = [
-    { code: 'en', label: 'English' },
-    { code: 'vi', label: 'Tiếng Việt' },
-];
 
 // Lets a visitor run any PDF Tools / File Converter job right on the landing page,
 // without an account - only downloading the finished result requires signing in.
@@ -25,7 +21,7 @@ const PdfToolsSection = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedTool, setSelectedTool] = useState(null); // 'compress' | 'split' | 'translate' | 'from-pdf:<format>' | 'to-pdf:<format>'
     const [quality, setQuality] = useState(50);
-    const [sourceLanguage, setSourceLanguage] = useState('en');
+    const [sourceLanguage, setSourceLanguage] = useState(AUTO_DETECT_CODE);
     const [targetLanguage, setTargetLanguage] = useState('vi');
     const [splitPageCount, setSplitPageCount] = useState(0);
     const [splitMode, setSplitMode] = useState('each');
@@ -264,10 +260,10 @@ const PdfToolsSection = () => {
 
                             <div>
                                 <h3 className="mb-4 text-lg font-bold uppercase tracking-wide text-gray-700 sm:text-xl">
-                                    {t('pdfTools.fromPdfSection')}
+                                    {t('pdfTools.toPdfSection')}
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                                    {FROM_PDF_TOOLS.map((tool) => (
+                                    {TO_PDF_TOOLS.map((tool) => (
                                         <button
                                             key={tool.id}
                                             onClick={() => selectTool(tool.id)}
@@ -282,10 +278,10 @@ const PdfToolsSection = () => {
 
                             <div>
                                 <h3 className="mb-4 text-lg font-bold uppercase tracking-wide text-gray-700 sm:text-xl">
-                                    {t('pdfTools.toPdfSection')}
+                                    {t('pdfTools.fromPdfSection')}
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                                    {TO_PDF_TOOLS.map((tool) => (
+                                    {FROM_PDF_TOOLS.map((tool) => (
                                         <button
                                             key={tool.id}
                                             onClick={() => selectTool(tool.id)}
@@ -450,7 +446,8 @@ const PdfToolsSection = () => {
                                                         disabled={job.isBusy}
                                                         className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
                                                     >
-                                                        {LANGUAGES.map((lang) => (
+                                                        <option value={AUTO_DETECT_CODE}>{t('pdfTools.autoDetect')}</option>
+                                                        {TRANSLATE_LANGUAGES.map((lang) => (
                                                             <option key={lang.code} value={lang.code}>
                                                                 {lang.label}
                                                             </option>
@@ -467,7 +464,7 @@ const PdfToolsSection = () => {
                                                         disabled={job.isBusy}
                                                         className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
                                                     >
-                                                        {LANGUAGES.map((lang) => (
+                                                        {TRANSLATE_LANGUAGES.map((lang) => (
                                                             <option key={lang.code} value={lang.code}>
                                                                 {lang.label}
                                                             </option>
@@ -485,20 +482,18 @@ const PdfToolsSection = () => {
                                         </div>
                                     )}
 
-                                    {job.step !== 'awaiting-login' && job.step !== 'completed' && (
-                                        <button
-                                            onClick={handleRunTool}
-                                            disabled={job.isBusy}
-                                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
-                                        >
-                                            {job.isBusy ? (
-                                                <>
-                                                    <Loader2 size={18} className="animate-spin" /> {jobStatusLabel}
-                                                </>
-                                            ) : (
-                                                t(runButtonLabelKey)
-                                            )}
-                                        </button>
+                                    {job.isBusy ? (
+                                        <JobProgressBar label={jobStatusLabel} progress={job.progress} />
+                                    ) : (
+                                        job.step !== 'awaiting-login' &&
+                                        job.step !== 'completed' && (
+                                            <button
+                                                onClick={handleRunTool}
+                                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
+                                            >
+                                                {t(runButtonLabelKey)}
+                                            </button>
+                                        )
                                     )}
 
                                     {job.step === 'awaiting-login' && (

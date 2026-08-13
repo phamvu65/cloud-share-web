@@ -20,18 +20,14 @@ import {
 import LinkShareModal from '../components/LinkShareModal.jsx';
 import LanguageToggle from '../components/LanguageToggle.jsx';
 import AuthModal from '../components/AuthModal.jsx';
+import JobProgressBar from '../components/tools/JobProgressBar.jsx';
 import { useFilePreview } from '../hooks/useFilePreview.js';
 import { usePdfJob } from '../hooks/usePdfJob.js';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import { FROM_PDF_FORMATS, TO_PDF_FORMATS } from '../util/pdfConvertFormats.js';
 import { downloadBlob } from '../util/downloadBlob.js';
 import { everyPageAsRange, parsePageRanges } from '../util/pdfPageRanges.js';
-
-// This tool only supports English <-> Vietnamese.
-const LANGUAGES = [
-    { code: 'en', label: 'English' },
-    { code: 'vi', label: 'Tiếng Việt' },
-];
+import { AUTO_DETECT_CODE, TRANSLATE_LANGUAGES } from '../util/translateLanguages.js';
 
 // No longer needs useAuth as this is a public page
 const PublicFileView = () => {
@@ -52,7 +48,7 @@ const PublicFileView = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [selectedTool, setSelectedTool] = useState(null); // e.g. 'compress' | 'split' | 'translate' | 'from-pdf:word' | 'to-pdf:png'
     const [quality, setQuality] = useState(50);
-    const [sourceLanguage, setSourceLanguage] = useState('en');
+    const [sourceLanguage, setSourceLanguage] = useState(AUTO_DETECT_CODE);
     const [targetLanguage, setTargetLanguage] = useState('vi');
     const [splitBytes, setSplitBytes] = useState(null);
     const [splitPageCount, setSplitPageCount] = useState(0);
@@ -450,10 +446,10 @@ const PublicFileView = () => {
 
                                 <div>
                                     <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                                        {t('pdfTools.fromPdfSection')}
+                                        {t('pdfTools.toPdfSection')}
                                     </h4>
                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                        {FROM_PDF_TOOLS.map((tool) => (
+                                        {TO_PDF_TOOLS.map((tool) => (
                                             <button
                                                 key={tool.id}
                                                 onClick={() => selectTool(tool.id)}
@@ -468,10 +464,10 @@ const PublicFileView = () => {
 
                                 <div>
                                     <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                                        {t('pdfTools.toPdfSection')}
+                                        {t('pdfTools.fromPdfSection')}
                                     </h4>
                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                        {TO_PDF_TOOLS.map((tool) => (
+                                        {FROM_PDF_TOOLS.map((tool) => (
                                             <button
                                                 key={tool.id}
                                                 onClick={() => selectTool(tool.id)}
@@ -613,7 +609,8 @@ const PublicFileView = () => {
                                                             disabled={isJobBusy}
                                                             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
                                                         >
-                                                            {LANGUAGES.map((lang) => (
+                                                            <option value={AUTO_DETECT_CODE}>{t('pdfTools.autoDetect')}</option>
+                                                            {TRANSLATE_LANGUAGES.map((lang) => (
                                                                 <option key={lang.code} value={lang.code}>
                                                                     {lang.label}
                                                                 </option>
@@ -630,7 +627,7 @@ const PublicFileView = () => {
                                                             disabled={isJobBusy}
                                                             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:opacity-50"
                                                         >
-                                                            {LANGUAGES.map((lang) => (
+                                                            {TRANSLATE_LANGUAGES.map((lang) => (
                                                                 <option key={lang.code} value={lang.code}>
                                                                     {lang.label}
                                                                 </option>
@@ -648,20 +645,18 @@ const PublicFileView = () => {
                                             </div>
                                         )}
 
-                                        {job.step !== 'awaiting-login' && job.step !== 'completed' && (
-                                            <button
-                                                onClick={handleRunTool}
-                                                disabled={isJobBusy}
-                                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
-                                            >
-                                                {isJobBusy ? (
-                                                    <>
-                                                        <Loader2 size={18} className="animate-spin" /> {jobStatusLabel}
-                                                    </>
-                                                ) : (
-                                                    t(runButtonLabelKey)
-                                                )}
-                                            </button>
+                                        {isJobBusy ? (
+                                            <JobProgressBar label={jobStatusLabel} progress={job.progress} />
+                                        ) : (
+                                            job.step !== 'awaiting-login' &&
+                                            job.step !== 'completed' && (
+                                                <button
+                                                    onClick={handleRunTool}
+                                                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-50"
+                                                >
+                                                    {t(runButtonLabelKey)}
+                                                </button>
+                                            )
                                         )}
 
                                         {job.step === 'awaiting-login' && (
