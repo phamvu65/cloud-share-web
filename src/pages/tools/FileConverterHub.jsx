@@ -28,14 +28,14 @@ const FileConverterHub = () => {
                     <p className="text-gray-600">{t('pdfTools.converterHubSubtitle')}</p>
                 </div>
 
-                <ToolSection title={t('pdfTools.fromPdfSection')}>
-                    {FROM_PDF_TOOLS.map((tool) => (
+                <ToolSection title={t('pdfTools.toPdfSection')}>
+                    {TO_PDF_TOOLS.map((tool) => (
                         <ToolCard key={tool.to} tool={tool} />
                     ))}
                 </ToolSection>
 
-                <ToolSection title={t('pdfTools.toPdfSection')}>
-                    {TO_PDF_TOOLS.map((tool) => (
+                <ToolSection title={t('pdfTools.fromPdfSection')}>
+                    {FROM_PDF_TOOLS.map((tool) => (
                         <ToolCard key={tool.to} tool={tool} />
                     ))}
                 </ToolSection>

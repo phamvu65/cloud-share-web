@@ -1,4 +1,4 @@
-import { BookOpen, FileSpreadsheet, FileText, FileType, Image, Presentation } from 'lucide-react';
+import { FileSpreadsheet, FileText, FileType, Image, Presentation } from 'lucide-react';
 
 // PDF -> other format. `convertFormat` matches the backend's ConvertFormat enum.
 export const FROM_PDF_FORMATS = {
@@ -13,7 +13,6 @@ export const FROM_PDF_FORMATS = {
 export const TO_PDF_FORMATS = {
     word: { extensions: ['doc', 'docx'], accept: '.doc,.docx', displayName: 'Word', icon: FileType },
     png: { extensions: ['png'], accept: '.png', displayName: 'PNG', icon: Image },
-    epub: { extensions: ['epub'], accept: '.epub', displayName: 'EPUB', icon: BookOpen },
     jpg: { extensions: ['jpg', 'jpeg'], accept: '.jpg,.jpeg', displayName: 'JPG', icon: Image },
     pptx: { extensions: ['pptx'], accept: '.pptx', displayName: 'PowerPoint', icon: Presentation },
     excel: { extensions: ['xlsx', 'xls'], accept: '.xlsx,.xls', displayName: 'Excel', icon: FileSpreadsheet },
