@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import { Download, Loader2 } from 'lucide-react';
+import Modal from '../components/Modal.jsx';
 import { apiEndpoints } from '../util/apiEndpoints.js';
+import { downloadBlob } from '../util/downloadBlob.js';
+import { clearPendingDownload, readPendingDownload } from '../util/pendingDownload.js';
+import { useTranslation } from './LanguageContext.jsx';
 
 const AuthContext = createContext(null);
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1.0";
@@ -23,6 +29,9 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('accessToken')); // State for the token
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true); // Renamed for clarity, matches previous suggestion
+    const [pendingDownload, setPendingDownload] = useState(null); // { jobId, downloadName } or null
+    const [isDownloading, setIsDownloading] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -81,6 +90,42 @@ export const AuthProvider = ({ children }) => {
  
         initializeAuth();
     }, [token]); // Re-run if token changes
+
+    // A PDF job finished while the user was signed out gets parked (see usePdfJob.js) and its
+    // { jobId, downloadName } persisted to localStorage. As soon as the user is authenticated -
+    // no matter where the login happened (the tool page's own modal, the navbar, a fresh page
+    // load with an existing session) - surface it here, globally, as a small confirmation modal
+    // (same pattern as LinkShareModal) instead of downloading automatically.
+    useEffect(() => {
+        if (!isAuthenticated || !token) return;
+        const pending = readPendingDownload();
+        if (pending) setPendingDownload(pending);
+    }, [isAuthenticated, token]);
+
+    const closePendingDownload = () => {
+        clearPendingDownload();
+        setPendingDownload(null);
+    };
+
+    const confirmPendingDownload = async () => {
+        if (!pendingDownload || isDownloading) return;
+        setIsDownloading(true);
+        try {
+            const res = await axios.get(apiEndpoints.DOWNLOAD_PDF_JOB_RESULT(pendingDownload.jobId), {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+            });
+            downloadBlob(res.data, pendingDownload.downloadName);
+        } catch (error) {
+            // Most likely already downloaded via the tool page's own flow, or the result
+            // expired server-side.
+            console.error('Error downloading pending PDF job result:', error);
+            toast.error(t('pdfTools.pendingDownloadError'));
+        } finally {
+            setIsDownloading(false);
+            closePendingDownload();
+        }
+    };
 
     const login = async (identifier, password) => {
         try {
@@ -272,6 +317,22 @@ export const AuthProvider = ({ children }) => {
             deleteAccount,
         }}>
             {children}
+            <Modal
+                isOpen={!!pendingDownload}
+                onClose={closePendingDownload}
+                title={t('pdfTools.pendingDownloadTitle')}
+                cancelText={t('modal.close')}
+                onConfirm={confirmPendingDownload}
+                confirmText={
+                    <span className="inline-flex items-center gap-1.5">
+                        {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        {isDownloading ? t('pdfTools.downloadingLabel') : t('pdfTools.pendingDownloadButton')}
+                    </span>
+                }
+                size="sm"
+            >
+                <p className="text-gray-600">{t('pdfTools.pendingDownloadReady')}</p>
+            </Modal>
         </AuthContext.Provider>
     );
 };
