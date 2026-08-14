@@ -149,11 +149,10 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose, onAuthenticated })
                     const reason = notification.getNotDisplayedReason?.();
                     const friendlyMessage = reason === 'suppressed_by_user' ? t('auth.googleBlocked') : t('auth.googleUnavailable');
                     setError(friendlyMessage);
-                } else if (notification?.isSkippedMoment?.()) {
-                    const reason = notification.getSkippedReason?.();
-                    const friendlyMessage = reason === 'user_cancel' ? t('auth.googleCanceled') : t('auth.googleSkipped');
-                    setError(friendlyMessage);
                 }
+                // Skipped/canceled moments (isSkippedMoment) are a normal, silent outcome -
+                // e.g. the browser throttling repeat prompts or the user dismissing the
+                // One Tap UI - not an error worth interrupting the user about.
             });
         } catch (err) {
             setError(t('auth.googleGenericUnavailable'));

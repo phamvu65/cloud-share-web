@@ -121,8 +121,6 @@ export const translations = {
             googleStillLoading: 'Google login is still loading. Please wait a moment.',
             googleBlocked: 'Google sign-in was blocked by the browser. Please allow third-party sign-in and try again.',
             googleUnavailable: 'Google sign-in is currently unavailable in this browser.',
-            googleCanceled: 'Google sign-in was canceled.',
-            googleSkipped: 'Google sign-in was skipped. Please try again.',
             googleGenericUnavailable: 'Google sign-in is currently unavailable. Please try another browser or enable third-party sign-in.',
         },
         account: {
@@ -535,8 +533,6 @@ export const translations = {
             googleStillLoading: 'Đăng nhập Google đang tải. Vui lòng đợi trong giây lát.',
             googleBlocked: 'Popup Google bị trình duyệt chặn. Hãy cho phép đăng nhập bên thứ ba và thử lại.',
             googleUnavailable: 'Đăng nhập Google hiện không khả dụng trên trình duyệt này.',
-            googleCanceled: 'Đã hủy đăng nhập Google.',
-            googleSkipped: 'Đăng nhập Google đã bị bỏ qua. Vui lòng thử lại.',
             googleGenericUnavailable: 'Đăng nhập Google hiện không khả dụng. Hãy thử trình duyệt khác hoặc cho phép đăng nhập bên thứ ba.',
         },
         account: {
