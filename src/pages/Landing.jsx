@@ -1,11 +1,10 @@
 import HeroSection from '../components/landing/HeroSection';
 import PdfToolsSection from '../components/landing/PdfToolsSection';
 import FeaturesSection from '../components/landing/FeaturesSection';
-import TestimonialsSection from '../components/landing/TestimonialsSection';
 import CTASection from '../components/landing/CTASection';
 import Footer from '../components/landing/Footer';
 
-import { features, testimonials } from '../assets/data.js';
+import { features } from '../assets/data.js';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -48,9 +47,6 @@ const Landing = () => {
 
             {/* Features Section */}
             <FeaturesSection features={features} />
-
-            {/* Testimonials Section */}
-            <TestimonialsSection testimonials={testimonials} />
 
             {/* CTA Section */}
             <CTASection openSignUp={openSignUp} />
