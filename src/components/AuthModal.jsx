@@ -87,7 +87,8 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose, onAuthenticated })
                 setPassword('');
             }
         } catch (err) {
-            setError(mode === 'signin' ? t('auth.signInFailed') : t('auth.signUpFailed'));
+            const fallback = mode === 'signin' ? t('auth.signInFailed') : t('auth.signUpFailed');
+            setError(err.response?.data?.message || fallback);
             console.error(err);
         } finally {
             setLoading(false);
@@ -251,15 +252,15 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose, onAuthenticated })
 
                             <div>
                                 <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
-                                    {t('auth.emailOrUsername')}
+                                    {mode === 'signup' ? t('auth.email') : t('auth.emailOrUsername')}
                                 </label>
                                 <input
                                     id="identifier"
-                                    type="text"
+                                    type={mode === 'signup' ? 'email' : 'text'}
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
                                     className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                                    placeholder={t('auth.emailOrUsername')}
+                                    placeholder={mode === 'signup' ? t('auth.email') : t('auth.emailOrUsername')}
                                     required
                                 />
                             </div>
