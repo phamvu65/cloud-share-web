@@ -10,6 +10,7 @@ export const ToolCard = ({ tool }) => (
         </div>
         <h3 className="font-semibold text-gray-900">{tool.title}</h3>
         <p className="mt-1 text-sm text-gray-500">{tool.description}</p>
+        {tool.note && <p className="mt-2 text-xs text-blue-600">{tool.note}</p>}
     </Link>
 );
 

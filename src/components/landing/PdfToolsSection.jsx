@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
-import { AlertCircle, ArrowLeft, FileText, LogIn, Loader2, Languages, Scissors, Shrink, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, FileText, Info, LogIn, Loader2, Languages, Scissors, Shrink, X } from 'lucide-react';
 import PdfDropzone from '../tools/PdfDropzone.jsx';
 import AuthModal from '../AuthModal.jsx';
 import JobProgressBar from '../tools/JobProgressBar.jsx';
@@ -430,6 +430,13 @@ const PdfToolsSection = () => {
                                                     </button>
                                                 ))}
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {toolCategory === 'translate' && (
+                                        <div className="flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
+                                            <Info size={16} className="mt-0.5 shrink-0" />
+                                            <span>{t('pdfTools.translateSlowNotice')}</span>
                                         </div>
                                     )}
 

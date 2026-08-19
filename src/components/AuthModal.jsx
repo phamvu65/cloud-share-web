@@ -127,7 +127,10 @@ const AuthModal = ({ isOpen, initialMode = 'signin', onClose, onAuthenticated })
             ux_mode: 'popup',
             auto_select: false,
             cancel_on_tap_outside: false,
-            use_fedcm_for_prompt: false,
+            // FedCM is the browser-native flow Google now requires; the old cookie-based
+            // prompt this used to opt out of is being blocked by browsers' third-party
+            // cookie restrictions, which is why the prompt was silently failing.
+            use_fedcm_for_prompt: true,
         });
         setGoogleInit(true);
     };

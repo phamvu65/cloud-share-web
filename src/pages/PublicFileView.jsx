@@ -597,6 +597,13 @@ const PublicFileView = () => {
                                         )}
 
                                         {toolCategory === 'translate' && (
+                                            <div className="flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
+                                                <Info size={16} className="mt-0.5 shrink-0" />
+                                                <span>{t('pdfTools.translateSlowNotice')}</span>
+                                            </div>
+                                        )}
+
+                                        {toolCategory === 'translate' && (
                                             <div className="rounded-lg border border-gray-200 p-5">
                                                 <div className="grid gap-4 sm:grid-cols-2">
                                                     <div>

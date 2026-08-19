@@ -8,7 +8,7 @@ import { formatFileSize } from '../../util/downloadBlob.js';
 import { apiEndpoints } from '../../util/apiEndpoints.js';
 import { AUTO_DETECT_CODE, TRANSLATE_LANGUAGES } from '../../util/translateLanguages.js';
 import { useTranslation } from '../../context/LanguageContext.jsx';
-import { AlertCircle, FileText, Languages, LogIn, X } from 'lucide-react';
+import { AlertCircle, FileText, Info, Languages, LogIn, X } from 'lucide-react';
 
 const ACCEPTED_EXTENSIONS = ['doc', 'docx'];
 
@@ -42,6 +42,11 @@ const TranslatePdf = () => {
     return (
         <PdfToolLayout title={t('pdfTools.translatePageTitle')} description={t('pdfTools.translatePageDescription')}>
             <div className="space-y-6">
+                <div className="flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
+                    <Info size={16} className="mt-0.5 shrink-0" />
+                    <span>{t('pdfTools.translateSlowNotice')}</span>
+                </div>
+
                 {!job.file ? (
                     <PdfDropzone
                         onFiles={job.handleFiles}
